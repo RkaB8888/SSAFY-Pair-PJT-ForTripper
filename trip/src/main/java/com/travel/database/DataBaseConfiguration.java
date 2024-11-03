@@ -1,11 +1,8 @@
-package com.example.demo;
+package com.travel.database;
 
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +27,7 @@ public class DataBaseConfiguration {
 
 	@Bean
 	public DataSource dataSource() throws Exception {
-		DataSource dataSource = new HikariDataSource(hikariConfig());
-		return dataSource;
+        return new HikariDataSource(hikariConfig());
 	}
 
 }

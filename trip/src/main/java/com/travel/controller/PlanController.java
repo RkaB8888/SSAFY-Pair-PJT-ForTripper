@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.travel.controller;
 
 public class PlanController {
 }
