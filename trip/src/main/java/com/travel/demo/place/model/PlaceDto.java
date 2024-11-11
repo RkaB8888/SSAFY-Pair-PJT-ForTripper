@@ -1,4 +1,4 @@
-package com.travel.place.model;
+package com.travel.demo.place.model;
 
 import lombok.Getter;
 import lombok.Setter;

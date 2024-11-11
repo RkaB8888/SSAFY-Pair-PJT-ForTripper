@@ -1,6 +1,6 @@
-package com.travel.place.mapper;
+package com.travel.demo.place.mapper;
 
-import com.travel.place.model.PlaceDto;
+import com.travel.demo.place.model.PlaceDto;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

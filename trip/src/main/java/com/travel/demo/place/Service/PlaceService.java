@@ -1,6 +1,6 @@
-package com.travel.place.Service;
+package com.travel.demo.place.Service;
 
-import com.travel.place.model.PlaceDto;
+import com.travel.demo.place.model.PlaceDto;
 
 public interface PlaceService {
     PlaceDto selectAll();

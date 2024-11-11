@@ -1,4 +1,4 @@
-package com.travel.database;
+package com.travel.demo.database;
 
 
 import com.zaxxer.hikari.HikariConfig;
