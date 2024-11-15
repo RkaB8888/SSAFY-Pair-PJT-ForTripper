@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Schema(title="User : 회원 DTO")
 public class User {
-
+    private long user_id;
     @NotBlank(message = "아이디로 사용될 사용자 이메일을 입력해 주세요.")
     @Email(message = "이메일 형식에 맞지 않습니다.")
     @Schema(description = "사용자 이메일", example = "usermail@gmail.com")
