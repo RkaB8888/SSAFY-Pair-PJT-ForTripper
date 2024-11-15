@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <h2>소개 입니다.</h2>
+    <h1 class="check">탐색 화면 입니다.</h1>
   </div>
 </template>
 
