@@ -6,7 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller
+@RestController
 @RequestMapping("/basic/plans")
 public class PlanController {
 
