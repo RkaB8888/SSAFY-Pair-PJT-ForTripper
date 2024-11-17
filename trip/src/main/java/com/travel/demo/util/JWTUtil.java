@@ -4,7 +4,8 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
-import com.travel.demo.users.dto.User;
+import com.travel.demo.users.domain.UserDomain;
+import com.travel.demo.users.dto.UserSignUpRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +28,13 @@ public class JWTUtil {
     }
 
     // 토큰 생성
-    public String generateToken(User user) {
+    public String generateToken(UserDomain user) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_SECONDS * 1000);
 
         return Jwts.builder()
                 .claim("id", user.getEmail())
-                .claim("name", user.getName())
+                .claim("nickName", user.getNickName())
                 .claim("role", user.getRole())
                 .expiration(expiration)				//만료 시간
                 .signWith(getSecretKey())

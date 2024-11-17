@@ -1,6 +1,9 @@
 package com.travel.demo.users.model.service;
 
-import com.travel.demo.users.dto.User;
+import com.travel.demo.users.domain.UserDomain;
+import com.travel.demo.users.dto.UserLoginRequest;
+import com.travel.demo.users.dto.UserSignUpRequest;
+import com.travel.demo.users.entity.UserEntity;
 import com.travel.demo.users.model.mapper.AuthMapper;
 import com.travel.demo.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,22 +20,33 @@ public class AuthServiceImpl implements AuthService{
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
-    public String join(User joinInfo) {
+    public String join(UserSignUpRequest joinInfo) {
         String encodedPassword = passwordEncoder.encode(joinInfo.getPassword());
         joinInfo.setPassword(encodedPassword);
 
         authMapper.join(joinInfo);
-        return jwtUtil.generateToken(joinInfo);
+        UserEntity userEntity = authMapper.findByEmail(joinInfo.getEmail());
+        UserDomain userDomain = new UserDomain();
+        userDomain.setEmail(userEntity.getEmail());
+        userDomain.setNickName(userEntity.getNickName());
+        userDomain.setRole(userEntity.getRole());
+        return jwtUtil.generateToken(userDomain);
     }
 
     @Override
-    public String login(User loginInfo) {
-        String id = loginInfo.getEmail();
+    public String login(UserLoginRequest loginInfo) {
+        String email = loginInfo.getEmail();
         String password = loginInfo.getPassword();
 
-        User user = authMapper.findByEmail(id);
-        if(user == null || !passwordEncoder.matches(password, user.getPassword())) return null;
+        System.out.println(email);
 
-        return jwtUtil.generateToken(user);
+        UserEntity userEntity = authMapper.findByEmail(email);
+        if(userEntity == null || !passwordEncoder.matches(password, userEntity.getPassword())) return null;
+
+        UserDomain userDomain = new UserDomain();
+        userDomain.setEmail(userEntity.getEmail());
+        userDomain.setNickName(userEntity.getNickName());
+        userDomain.setRole(userEntity.getRole());
+        return jwtUtil.generateToken(userDomain);
     }
 }
