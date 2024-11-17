@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
+//영업시간 추가해야 함!
 @Data
 public class VisitPlace {
     long visit_id;          //방문 장소 ID (PK)

@@ -1,11 +1,11 @@
-package com.travel.demo.plan.domain;
+package com.travel.demo.plan.entity;
 
 import lombok.Data;
 
 import java.sql.Timestamp;
 
 @Data
-public class Plan {
+public class PlanEntity {
     private long plan_id;
     private long user_id;
     private String plan_title;

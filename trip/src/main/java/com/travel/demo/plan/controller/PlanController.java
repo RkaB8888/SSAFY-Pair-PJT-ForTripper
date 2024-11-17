@@ -19,11 +19,6 @@ public class PlanController {
         return "basic/plans";
     }
 
-    @GetMapping("/add")
-    public String planAdd() {
-        return "basic/plans/add";
-    }
-
     @PostMapping("/add")
     public String planAdd(@ModelAttribute PlanDto planDto, RedirectAttributes redirectAttributes) {
         //DB에 planDto 저장
