@@ -13,8 +13,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @Schema(title="User : 회원 DTO")
-public class User {
-    private long user_id;
+public class UserDto {
     @NotBlank(message = "아이디로 사용될 사용자 이메일을 입력해 주세요.")
     @Email(message = "이메일 형식에 맞지 않습니다.")
     @Schema(description = "사용자 이메일", example = "usermail@gmail.com")
@@ -39,9 +38,4 @@ public class User {
     @NotBlank(message = "휴대폰 번호를 입력해주세요.")
     @Schema(description = "휴대폰 번호", example = "01012345678")
     private String phone;
-    private int grade;
-    private String role;
-    private Timestamp createDate;
-    private Timestamp modifyDate;
-    private int active;     //계정 활성화 여부
 }
