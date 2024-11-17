@@ -1,12 +1,16 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
 // Vue Router 사용
 const router = useRouter();
+const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
 
-// 로그인 상태 (true: 로그인됨, false: 비로그인)
-const isLoggedIn = ref(true);
+// 로그아웃 함수
+const isLogout = () => {
+  authStore.logout(); // 로그아웃 실행
+  navigateTo("/"); // 홈 화면으로 이동
+};
 
 // 라우팅 함수
 const navigateTo = (path) => {
@@ -29,7 +33,7 @@ const navigateTo = (path) => {
 
       <!-- Right Side: 로그인/회원가입 또는 다른 메뉴 -->
       <div class="right-section d-flex align-center">
-        <template v-if="!isLoggedIn">
+        <template v-if="!authStore.isLoggedIn">
           <!-- 비로그인 상태 -->
           <v-btn outlined class="nav-btn" @click="navigateTo('/auth/login')">
             로그인
@@ -55,9 +59,7 @@ const navigateTo = (path) => {
           <v-btn text class="nav-btn" @click="navigateTo('/notifications')">
             알람
           </v-btn>
-          <v-btn text class="nav-btn" @click="navigateTo('/logout')">
-            로그아웃
-          </v-btn>
+          <v-btn text class="nav-btn" @click="isLogout"> 로그아웃 </v-btn>
           <v-avatar size="36">
             <img src="@/assets/img/temp_profile.jpg" alt="Profile" />
           </v-avatar>
