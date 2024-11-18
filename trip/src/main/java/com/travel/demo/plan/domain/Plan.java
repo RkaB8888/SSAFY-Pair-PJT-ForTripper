@@ -1,5 +1,7 @@
 package com.travel.demo.plan.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.sql.Timestamp;
