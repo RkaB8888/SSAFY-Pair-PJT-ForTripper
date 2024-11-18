@@ -5,4 +5,14 @@
     <select id="selectAll" resultType="place">
         select * from place
     </select>
+
+<!--    Plan 저장 예시-->
+<!--    INSERT INTO Plan (userID, column1, column2, ...)-->
+<!--    VALUES (-->
+<!--    (SELECT userID FROM User WHERE email = #{email}),-->
+<!--    #{column1Value},-->
+<!--    #{column2Value},-->
+<!--    ...-->
+<!--    );-->
+
 </mapper>

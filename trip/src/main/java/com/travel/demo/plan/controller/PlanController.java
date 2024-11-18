@@ -2,8 +2,10 @@ package com.travel.demo.plan.controller;
 
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.plan.dto.VisitPlaceEditRequest;
+import com.travel.demo.plan.model.service.PlanService;
 import com.travel.demo.users.domain.UserDomain;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +15,19 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/plans")
+@RequiredArgsConstructor
 public class PlanController {
+
+    private final PlanService planService;
 
     //계획 생성
     @PostMapping("/add")
-    public String planAdd(HttpServletRequest request) {
-        //DB에 planDto 저장
-        //생성된 planDto에서 plan_id 갖고옴
-        //redirectAttribute에 데이터 전달
+    public String planAdd(HttpServletRequest request, @ModelAttribute PlanAddRequest plan) {
         System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
+        String token = request.getHeader("Authorization");
+        planService.PlanAdd(token, plan);
+        //토큰 파싱
+        //입력된 PlanDto DB에 저장
         return "redirect:/basic/plans/{plan_id}";
     }
 

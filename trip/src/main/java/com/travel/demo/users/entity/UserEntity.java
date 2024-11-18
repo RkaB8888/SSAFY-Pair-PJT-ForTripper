@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -42,7 +43,7 @@ public class UserEntity {
     private String phone;
     private int grade;
     private String role;
-    private Timestamp createDate;
-    private Timestamp modifyDate;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
     private int active;     //계정 활성화 여부
 }
