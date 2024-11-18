@@ -1,17 +1,20 @@
 <script setup>
-import PopularFestivalView from "@/views/HomeViews/PopularFestivalView.vue";
+import PopularFestivalsView from "@/views/HomeViews/PopularFestivalsView.vue";
 import RecentBoardListView from "@/views/HomeViews/RecentBoardListView.vue";
-import RecentReviewView from "@/views/HomeViews/RecentReviewView.vue";
+import RecentReviewsView from "@/views/HomeViews/RecentReviewsView.vue";
 import RecentFriendsView from "@/views/HomeViews/RecentFriendsView.vue";
 </script>
 
 <template>
   <div>
-    <h1>홈페이지 화면 입니다.</h1>
-    <PopularFestivalView />
+    <!-- <h1>홈페이지 화면 입니다.</h1> -->
+    <PopularFestivalsView />
+    <hr />
     <RecentFriendsView />
+    <hr />
     <RecentBoardListView />
-    <RecentReviewView />
+    <hr />
+    <RecentReviewsView />
   </div>
 </template>
 

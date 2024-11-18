@@ -1,5 +1,5 @@
 <script setup>
-import RecentBoardView from "@/views/HomeViews/RecentBoardView.vue";
+import RecentReviewView from "./RecentReviewView.vue";
 
 const posts = [
   {
@@ -99,20 +99,20 @@ const posts = [
 </script>
 
 <template>
-  <div class="recent-board">
-    <h2>최신 게시글</h2>
+  <div class="recent-review">
+    <h2>최근 여행 후기</h2>
 
     <!-- Carousel -->
     <v-slide-group show-arrows>
       <v-slide-item v-for="post in posts" :key="post.id">
-        <RecentBoardView :post="post" />
+        <RecentReviewView :post="post" />
       </v-slide-item>
     </v-slide-group>
   </div>
 </template>
 
 <style scoped>
-.recent-board {
+.recent-review {
   padding: 16px;
 }
 </style>

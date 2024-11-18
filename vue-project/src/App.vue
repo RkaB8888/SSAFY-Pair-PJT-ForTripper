@@ -3,20 +3,36 @@ import NavigationView from "@/views/NavigationView.vue";
 </script>
 
 <template>
-  <v-app class="all">
+  <v-app>
     <!-- Header -->
     <header>
       <NavigationView />
     </header>
 
     <!-- Main Content -->
-    <main>
+    <main class="main-content">
       <router-view />
     </main>
   </v-app>
 </template>
 
 <style scoped>
+/* 전체 화면 스타일 */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* HTML과 BODY의 높이 설정 */
+  overflow: hidden; /* HTML 스크롤 제거 */
+}
+
+/* v-app 스타일 */
+v-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 전체 높이 차지 */
+}
+
 /* Header 스타일 */
 header {
   height: 68px; /* 네비게이션 바 높이 */
@@ -28,13 +44,10 @@ header {
 }
 
 /* Main Content 스타일 */
-.all {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* 전체 화면 높이 */
-}
-main {
+.main-content {
   flex: 1; /* 남은 공간 차지 */
-  overflow: auto; /* 콘텐츠 넘칠 경우 스크롤 활성화 */
+  overflow-y: auto; /* 수직 스크롤 가능 */
+  padding: 16px; /* 콘텐츠 간 여백 */
+  background-color: #f9f9f9; /* 콘텐츠 배경색 */
 }
 </style>
