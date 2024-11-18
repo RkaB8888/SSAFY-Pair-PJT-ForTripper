@@ -3,7 +3,7 @@ import NavigationView from "@/views/NavigationView.vue";
 </script>
 
 <template>
-  <v-app>
+  <v-app class="all">
     <!-- Header -->
     <header>
       <NavigationView />
@@ -28,8 +28,13 @@ header {
 }
 
 /* Main Content 스타일 */
+.all {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 높이 */
+}
 main {
-  padding-top: 68px; /* 네비게이션 바 높이만큼 공간 확보 */
-  padding: 16px;
+  flex: 1; /* 남은 공간 차지 */
+  overflow: auto; /* 콘텐츠 넘칠 경우 스크롤 활성화 */
 }
 </style>

@@ -1,12 +1,30 @@
-<script setup>
-import { RouterView } from "vue-router";
-</script>
+<script setup></script>
 
 <template>
-  <div class="check">
-    <h1>인증 화면입니다.</h1>
-    <router-view />
-  </div>
+  <v-container class="auth-container fill-height" fluid>
+    <v-row justify="center" align="center"> <RouterView /> </v-row>
+  </v-container>
 </template>
 
-<style scoped></style>
+<style scoped>
+.auth-container {
+  background-color: #665e5e;
+  height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  max-width: 800px; /* 카드의 최대 너비 제한 */
+}
+
+.signup-section {
+  background-color: #f4f4f4;
+  padding: 16px;
+  border-right: 1px solid #ddd; /* 가운데 분리선 */
+}
+
+.login-section {
+  background-color: #ffffff;
+  padding: 16px;
+}
+</style>

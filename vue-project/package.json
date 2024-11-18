@@ -10,6 +10,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "axios": "^1.7.7",
     "pinia": "^2.2.6",
     "pinia-plugin-persistedstate": "^4.1.3",

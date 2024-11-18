@@ -2,6 +2,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import { createPinia } from "pinia";
 import "@/assets/styles/global.css"; // 전역 스타일 파일 추가
+import "@mdi/font/css/materialdesignicons.css"; // MDI 아이콘 CSS 추가
+
 // Vuetify 관련 추가
 import { createVuetify } from "vuetify";
 import "vuetify/styles";
