@@ -9,8 +9,8 @@
 <style scoped>
 .auth-container {
   background-color: #665e5e;
-  height: 100vh;
-  padding: 24px;
+  /* height: 100%; */
+  /* padding: 24px; */
 }
 
 .auth-card {

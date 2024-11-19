@@ -47,7 +47,6 @@ header {
 .main-content {
   flex: 1; /* 남은 공간 차지 */
   overflow-y: auto; /* 수직 스크롤 가능 */
-  padding: 16px; /* 콘텐츠 간 여백 */
   background-color: #f9f9f9; /* 콘텐츠 배경색 */
 }
 </style>

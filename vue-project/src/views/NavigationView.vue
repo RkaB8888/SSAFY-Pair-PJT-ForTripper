@@ -28,12 +28,12 @@ const navigateTo = (path) => {
           <img src="@/assets/img/temp_logo.png" class="nav-logo" alt="Logo" />
         </v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/search')">탐색</v-btn>
-        <v-btn text class="nav-btn" @click="navigateTo('/board')">목록</v-btn>
+        <v-btn text class="nav-btn" @click="navigateTo('/board')">게시판</v-btn>
       </div>
 
       <!-- Right Side: 로그인/회원가입 또는 다른 메뉴 -->
       <div class="right-section d-flex align-center">
-        <template v-if="!authStore.isLoggedIn">
+        <template v-if="!authStore.isLogin">
           <!-- 비로그인 상태 -->
           <v-btn outlined class="nav-btn" @click="navigateTo('/auth/login')">
             로그인
@@ -50,15 +50,12 @@ const navigateTo = (path) => {
         <template v-else>
           <!-- 로그인 상태 -->
           <v-btn text class="nav-btn" @click="navigateTo('/plan')">계획</v-btn>
-          <v-btn text class="nav-btn" @click="navigateTo('/friends')">
-            친구
-          </v-btn>
           <v-btn text class="nav-btn" @click="navigateTo('/photos')">
             사진
           </v-btn>
-          <v-btn text class="nav-btn" @click="navigateTo('/notifications')">
+          <!-- <v-btn text class="nav-btn" @click="navigateTo('/notifications')">
             알람
-          </v-btn>
+          </v-btn> -->
           <v-btn text class="nav-btn" @click="isLogout"> 로그아웃 </v-btn>
           <v-avatar size="36">
             <img src="@/assets/img/temp_profile.jpg" alt="Profile" />

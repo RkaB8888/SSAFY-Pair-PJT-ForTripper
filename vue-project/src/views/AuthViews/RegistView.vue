@@ -1,38 +1,69 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from "vue";
-
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const { checkIdDuplicate } = authStore;
 // 상태 관리
 const router = useRouter();
-const email = ref("");
-const password = ref("");
 const passwordConfirm = ref("");
-const name = ref("");
-const nickname = ref("");
-const phone = ref("");
 const emailError = ref("");
 const passwordError = ref("");
 const nicknameError = ref("");
 const phoneError = ref("");
 
+//회원가입 정보
+const registInfo = ref({
+  email: "",
+  password: "",
+  name: "",
+  nickname: "",
+  phone: "",
+});
+
 // 검증 함수
 const validate = () => {
-  emailError.value = validateEmail(email.value)
+  emailError.value = validateEmail(registInfo.value.email)
     ? ""
     : "올바른 이메일 형식이 아닙니다.";
   passwordError.value =
-    password.value !== passwordConfirm.value ? "비밀번호가 다릅니다." : "";
+    registInfo.value.password !== passwordConfirm.value
+      ? "비밀번호가 다릅니다."
+      : "";
   nicknameError.value =
-    nickname.value === "NickName" ? "이미 존재하는 닉네임" : "";
-  phoneError.value = validatePhone(phone.value)
+    registInfo.value.nickname === "NickName" ? "이미 존재하는 닉네임" : "";
+  phoneError.value = validatePhone(registInfo.value.phone)
     ? ""
-    : phone.value
+    : registInfo.value.phone
     ? "올바른 형식이 아닙니다."
     : "";
 };
 
 const validateEmail = (value) => /\S+@\S+\.\S+/.test(value);
-const validatePhone = (value) => /^010-\d{3,4}-\d{4}$/.test(value);
+const validatePhone = (value) => /^010\d{8}$/.test(value);
+
+const checkId = async () => {
+  const isEmailValid = validateEmail();
+  if (isEmailValid && (await checkIdDuplicate(registInfo.value.email))) {
+    console.log("가능");
+  } else {
+    console.log("불가능");
+  }
+};
+// const login = async () => {
+//   const isEmailValid = validateEmail();
+//   const isPasswordValid = validatePassword();
+//   if (isEmailValid && isPasswordValid) {
+//     await userLogin(loginUser.value);
+//     if (isLogin.value) {
+//       const token = sessionStorage.getItem("accessToken");
+//       await getUserInfo(token);
+//       router.replace("/");
+//     }
+//   } else {
+//     console.error("로그인 실패: 입력 값 확인 필요");
+//   }
+// };
 
 // 로그인 페이지로 이동
 const navigateToLogin = () => {
@@ -56,11 +87,13 @@ const navigateToLogin = () => {
                 placeholder="abc1234@naver.com"
                 outlined
                 dense
-                v-model="email"
+                v-model="registInfo.email"
                 :error-messages="emailError"
                 @blur="validate"
               />
-              <v-btn small class="check-btn" outlined>중복 확인</v-btn>
+              <v-btn small class="check-btn" outlined @click="checkId"
+                >중복 확인</v-btn
+              >
             </div>
 
             <!-- 비밀번호 -->
@@ -70,7 +103,7 @@ const navigateToLogin = () => {
               placeholder="비밀번호를 입력해주세요."
               outlined
               dense
-              v-model="password"
+              v-model="registInfo.password"
             />
             <v-text-field
               label="비밀번호 확인"
@@ -89,7 +122,7 @@ const navigateToLogin = () => {
               placeholder="홍길동"
               outlined
               dense
-              v-model="name"
+              v-model="registInfo.name"
             />
 
             <!-- 닉네임 입력 -->
@@ -99,7 +132,7 @@ const navigateToLogin = () => {
                 placeholder="NickName"
                 outlined
                 dense
-                v-model="nickname"
+                v-model="registInfo.nickname"
                 :error-messages="nicknameError"
                 @blur="validate"
               />
@@ -112,7 +145,7 @@ const navigateToLogin = () => {
               placeholder="010-1234-5678"
               outlined
               dense
-              v-model="phone"
+              v-model="registInfo.phone"
               :error-messages="phoneError"
               @blur="validate"
             />

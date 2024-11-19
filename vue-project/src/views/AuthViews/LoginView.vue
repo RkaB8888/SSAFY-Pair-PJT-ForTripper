@@ -1,28 +1,68 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
 
+const authStore = useAuthStore();
+const { isLogin, isLoginError } = storeToRefs(authStore);
+const { userLogin, getUserInfo } = authStore;
 // 상태 관리
 const router = useRouter();
-const email = ref("");
-const password = ref("");
-const emailError = ref(""); // 이메일 검증 에러 메시지
-const rememberMe = ref(false); // 아이디 기억하기 상태
+const emailError = ref("");
+const passwordError = ref("");
+const showPassword = ref(false); // 비밀번호 표시 토글
+// const rememberMe = ref(false); // 아이디 기억하기 상태
+const loginUser = ref({
+  email: "",
+  password: "",
+});
+
 // 이메일 검증 함수
 const validateEmail = () => {
-  if (!email.value) {
-    emailError.value = ""; // 입력값이 비어 있으면 경고 메시지 제거
-    return;
+  if (!loginUser.value.email.trim()) {
+    emailError.value = "이메일을 입력해주세요.";
+    return false;
   }
   const emailPattern = /\S+@\S+\.\S+/; // 이메일 형식 정규표현식
-  emailError.value = emailPattern.test(email.value)
-    ? ""
-    : "올바른 이메일 형식이 아닙니다.";
+  if (!emailPattern.test(loginUser.value.email)) {
+    emailError.value = "올바른 이메일 형식이 아닙니다.";
+    return false;
+  } else {
+    emailError.value = "";
+    return true;
+  }
+};
+
+// 비밀번호 검증 함수
+const validatePassword = () => {
+  if (!loginUser.value.password.trim()) {
+    passwordError.value = "비밀번호를 입력해주세요.";
+    return false;
+  }
+  passwordError.value = "";
+  return true;
 };
 
 // 회원가입 페이지로 이동
 const mvRegist = () => {
   router.push("/auth/regist");
+};
+
+//로그인
+const login = async () => {
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
+  if (isEmailValid && isPasswordValid) {
+    await userLogin(loginUser.value);
+    if (isLogin.value) {
+      const token = sessionStorage.getItem("accessToken");
+      await getUserInfo(token);
+      router.replace("/");
+    }
+  } else {
+    console.error("로그인 실패: 입력 값 확인 필요");
+  }
 };
 </script>
 
@@ -40,32 +80,53 @@ const mvRegist = () => {
               placeholder="abc1234@naver.com"
               outlined
               dense
-              v-model="email"
+              v-model="loginUser.email"
               :error-messages="emailError"
               @blur="validateEmail"
             />
             <!-- 비밀번호 입력 -->
             <v-text-field
               label="비밀번호"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               placeholder="비밀번호를 입력해주세요."
               outlined
               dense
-              v-model="password"
-            />
+              v-model="loginUser.password"
+              :error-messages="passwordError"
+              class="password-field"
+            >
+              <v-btn
+                icon
+                class="password-toggle-btn"
+                @click="showPassword = !showPassword"
+              >
+                <v-icon>
+                  {{ showPassword ? "mdi-eye-off" : "mdi-eye" }}
+                </v-icon>
+              </v-btn>
+            </v-text-field>
             <!-- 아이디 기억하기 -->
-            <div class="remember-me">
+            <!-- <div class="remember-me">
               <v-checkbox
                 v-model="rememberMe"
                 label="아이디 기억하기"
                 density="compact"
                 max-width="150"
               ></v-checkbox>
-            </div>
+            </div> -->
             <!-- 로그인 버튼 -->
-            <v-btn color="#1E88E5" class="mt-4 login-btn" block large>
+            <v-btn
+              @click="login"
+              color="#1E88E5"
+              class="mt-4 login-btn"
+              block
+              large
+            >
               로그인
             </v-btn>
+            <v-alert v-if="isLoginError" type="error" class="mt-4">
+              로그인 실패: 이메일 또는 비밀번호를 확인하세요.
+            </v-alert>
           </v-card-text>
 
           <!-- 회원가입 버튼 -->
@@ -125,5 +186,17 @@ const mvRegist = () => {
   border-radius: 8px;
   color: white; /* 텍스트 색상 */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 버튼 그림자 */
+}
+.password-field {
+  position: relative; /* 부모 요소를 기준으로 절대 배치 */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%; /* 수직 중앙 정렬 */
+  transform: translateY(-50%);
+  z-index: 10; /* 버튼이 텍스트 필드 위에 나타나도록 설정 */
+  color: #757575; /* 버튼 색상 (선택 사항) */
 }
 </style>
