@@ -17,12 +17,12 @@ public class PlanAddRequest {
     private String plan_title;
 
     @NotBlank(message = "여행 시작 날짜를 입력해주세요.")
-    @Schema(description = "여행 시작 날짜", example = "2025-05-07 10:00:00")
-    private LocalDate startDate;
+    @Schema(description = "여행 시작 날짜", example = "2025-05-07")
+    private LocalDate start_date;
 
     @NotBlank(message = "여행 마지막 날짜를 입력해주세요.")
-    @Schema(description = "여행 마지막 날짜", example = "2025-05-10 18:00:00")
-    private LocalDate endDate;
+    @Schema(description = "여행 마지막 날짜", example = "2025-05-10")
+    private LocalDate end_date;
 
     @NotBlank(message = "해당 여행에 대한 부가적인 설명을 입력해주세요")
     @Schema(description = "여행 설명", example = "우리 가족 4년만의 가족여행!")
