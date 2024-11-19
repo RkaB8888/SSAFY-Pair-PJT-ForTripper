@@ -43,8 +43,8 @@ const validateEmail = (value) => /\S+@\S+\.\S+/.test(value);
 const validatePhone = (value) => /^010\d{8}$/.test(value);
 
 const checkId = async () => {
-  const isEmailValid = validateEmail();
-  if (isEmailValid && (await checkIdDuplicate(registInfo.value.email))) {
+  const isEmailValid = validateEmail(registInfo.value.email);
+  if (isEmailValid && !(await checkIdDuplicate(registInfo.value.email))) {
     console.log("가능");
   } else {
     console.log("불가능");
@@ -142,7 +142,7 @@ const navigateToLogin = () => {
             <!-- 휴대폰 입력 -->
             <v-text-field
               label="휴대폰 번호 (선택)"
-              placeholder="010-1234-5678"
+              placeholder="01012345678"
               outlined
               dense
               v-model="registInfo.phone"
@@ -182,7 +182,7 @@ const navigateToLogin = () => {
 
 /* 회원가입 카드 */
 .signup-card {
-  background-color: white;
+  background-color: rgb(26, 156, 123);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);

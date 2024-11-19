@@ -151,9 +151,12 @@ export const useAuthStore = defineStore("authStore", () => {
     await findById(
       userid,
       (response) => {
+        console.log(response.status);
         if (response.status === httpStatusCode.OK) {
+          console.log("정상응답 받음");
           isIdDuplicate.value = true; // 중복된 아이디
         } else {
+          console.log("부정응답 받음");
           isIdDuplicate.value = false; // 사용 가능한 아이디
         }
       },

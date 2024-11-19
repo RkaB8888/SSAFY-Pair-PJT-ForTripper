@@ -156,7 +156,7 @@ const login = async () => {
 
 /* 로그인 카드 */
 .login-card {
-  background-color: white;
+  background-color: rgb(26, 156, 123);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 카드 그림자 */

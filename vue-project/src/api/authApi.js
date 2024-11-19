@@ -7,12 +7,15 @@ async function userConfirm(param, success, fail) {
 }
 
 async function findById(userid, success, fail) {
-  await local.get(`/users/${userid}`).then(success).catch(fail);
+  const encodedEmail = encodeURIComponent(userid);
+  console.log(encodedEmail);
+  await local.get(`/users/${encodedEmail}`).then(success).catch(fail);
 }
 async function checkByToken(userid, success, fail) {
   local.defaults.headers["Authorization"] =
     sessionStorage.getItem("accessToken");
-  await local.get(`/users/check/${userid}`).then(success).catch(fail);
+  const encodedEmail = encodeURIComponent(userid);
+  await local.get(`/users/check/${encodedEmail}`).then(success).catch(fail);
 }
 async function tokenRegeneration(user, success, fail) {
   local.defaults.headers["refreshToken"] =
@@ -21,7 +24,8 @@ async function tokenRegeneration(user, success, fail) {
 }
 
 async function logout(userid, success, fail) {
-  await local.delete(`/users/logout/${userid}`).then(success).catch(fail);
+  const encodedEmail = encodeURIComponent(userid);
+  await local.delete(`/users/logout/${encodedEmail}`).then(success).catch(fail);
 }
 
 async function userRegister(param, success, fail) {
