@@ -6,6 +6,7 @@ import com.travel.demo.plan.dto.PlaceEditRequest;
 import com.travel.demo.plan.model.service.PlanService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,8 +58,19 @@ public class PlanController {
 
     //계획 수정
     @PostMapping("/{plan_id}/edit")
-    public String edit(@PathVariable long plan_id, @ModelAttribute PlaceEditRequest place) {
-        //DB에 수정 반영
-        return "redirect:/basic/plans/{plan_id}";
+    public ResponseEntity<?> edit(@PathVariable long plan_id, @RequestBody PlaceEditRequest dailySchedules,
+                                  @RequestHeader("Authorization") String token) {
+        try {
+            System.out.println("스케줄 서버 저장 요청!");
+            System.out.println(dailySchedules);
+
+            // DB에 수정 반영
+            // 성공 시 200 OK 반환
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
     }
 }
