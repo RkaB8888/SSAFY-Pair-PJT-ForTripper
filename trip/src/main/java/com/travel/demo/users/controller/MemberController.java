@@ -51,9 +51,9 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequest loginInfo) {
         System.out.println(loginInfo);
-        String token = authService.login(loginInfo);
-        if(token == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 잘못되었습니다.");
-        return ResponseEntity.ok(token);
+        Map<String, String> tokens = authService.login(loginInfo);
+        if(tokens == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 잘못되었습니다.");
+        return ResponseEntity.ok(tokens);
     }
     
     //delete

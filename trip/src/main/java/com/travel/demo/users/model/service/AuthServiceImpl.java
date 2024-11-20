@@ -1,5 +1,8 @@
 package com.travel.demo.users.model.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +40,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     @Override
-    public String login(UserLoginRequest loginInfo) {
+    public Map<String, String> login(UserLoginRequest loginInfo) {
         String email = loginInfo.getEmail();
         String password = loginInfo.getPassword();
 
@@ -50,7 +53,19 @@ public class AuthServiceImpl implements AuthService{
         userDomain.setEmail(userEntity.getEmail());
         userDomain.setNickName(userEntity.getNickName());
         userDomain.setRole(userEntity.getRole());
-        return jwtUtil.generateToken(userDomain);
+        
+     // Access Token 생성
+        String accessToken = jwtUtil.generateToken(userDomain);
+
+        // Refresh Token 생성
+        String refreshToken = jwtUtil.generateRefreshToken(userDomain);
+
+        // Access Token과 Refresh Token을 Map으로 반환
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access-token", accessToken);
+        tokens.put("refresh-token", refreshToken);
+        
+        return tokens;
     }
 
 	@Override

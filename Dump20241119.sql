@@ -61,7 +61,7 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `name` varchar(100) NOT NULL,
   `nickname` varchar(100) NOT NULL,
-  `phone` varchar(15) NOT NULL,
+  `phone` varchar(15),
   `email` varchar(100) NOT NULL,
   `grade` tinyint NOT NULL DEFAULT '3',
   `role` varchar(100) NOT NULL DEFAULT 'NORMAL',
