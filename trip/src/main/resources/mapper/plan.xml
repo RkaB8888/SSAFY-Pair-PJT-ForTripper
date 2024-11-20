@@ -16,6 +16,13 @@
         order by start_date
     </select>
 
+    <select id="findVisitPlacesByPlanId" parameterType="long" resultType="PlaceListResponse">
+        select visit_google_id, display_name, address, phone_number, latitude, longitude, visit_date, visit_order
+        from places
+        where plan_id = #{plan_id}
+        order by visit_date, visit_order
+    </select>
+
 <!--    Plan 저장 예시-->
 <!--    INSERT INTO Plan (userID, column1, column2, ...)-->
 <!--    VALUES (-->

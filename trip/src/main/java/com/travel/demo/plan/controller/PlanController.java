@@ -2,18 +2,13 @@ package com.travel.demo.plan.controller;
 
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.plan.dto.PlanListResponse;
-import com.travel.demo.plan.dto.VisitPlaceEditRequest;
+import com.travel.demo.plan.dto.PlaceEditRequest;
 import com.travel.demo.plan.model.service.PlanService;
-import com.travel.demo.users.domain.UserDomain;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -37,9 +32,7 @@ public class PlanController {
     public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable long plan_id) {
         System.out.println("planDetail 호출! plan_id는 " + plan_id);
         String token = request.getHeader("Authrization");
-
-        //Authrization의 userID 정보와 plan_id의 plan을 만든 사람의 userID가 일치해야 함
-        //일치한다면 해당 plan의 plan과 place 정보 가져와서 리턴
+        planService.findVisitPlacesByPlanId(token, plan_id);
         return (ResponseEntity<?>) ResponseEntity.ok();
     }
 
@@ -64,7 +57,7 @@ public class PlanController {
 
     //계획 수정
     @PostMapping("/{plan_id}/edit")
-    public String edit(@PathVariable long plan_id, @ModelAttribute VisitPlaceEditRequest place) {
+    public String edit(@PathVariable long plan_id, @ModelAttribute PlaceEditRequest place) {
         //DB에 수정 반영
         return "redirect:/basic/plans/{plan_id}";
     }
