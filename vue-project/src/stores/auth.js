@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import {
   userConfirm,
   findById,
+  findByNickName,
   tokenRegeneration,
   logout,
   userRegister,
@@ -122,19 +123,24 @@ export const useAuthStore = defineStore("authStore", () => {
     );
   };
   const checkToken = async (token) => {
+    console.log("checkToken 진입");
+    console.log("encodeToken 값 확인:", token);
     let decodeToken = jwtDecode(token);
+    console.log("1111111");
     console.log(decodeToken);
     await checkByToken(
       decodeToken.id,
       (response) => {
         if (response.status === httpStatusCode.OK) {
           userInfo.value = response.data.userInfo;
+          console.log("응답 성공");
         } else {
           userInfo.value = null;
           console.log("유저 정보 없음!!!!");
         }
       },
       async (error) => {
+        console.log("에러");
         console.error(
           "g[토큰 만료되어 사용 불가능.] : ",
           error.response.status,
@@ -147,30 +153,75 @@ export const useAuthStore = defineStore("authStore", () => {
     );
   };
   const checkIdDuplicate = async (userid) => {
-    const isIdDuplicate = ref(false);
+    const isIdDuplicate = ref({});
     await findById(
       userid,
       (response) => {
-        console.log(response.status);
-        if (response.status === httpStatusCode.OK) {
-          console.log("정상응답 받음");
-          isIdDuplicate.value = true; // 중복된 아이디
-        } else {
-          console.log("부정응답 받음");
-          isIdDuplicate.value = false; // 사용 가능한 아이디
-        }
+        console.log("응답 성공:", response.data.message);
+        isIdDuplicate.value.status = 200; // 중복된 아이디
+        isIdDuplicate.value.msg = "해당 이메일은 이미 존재합니다.";
       },
       (error) => {
-        console.error("중복 체크 실패:", error);
-        isIdDuplicate.value = null;
+        console.error("응답 에러:", error.response.data.message);
+        if (error.response.status === 404) {
+          // 사용자 없음 메시지 확인
+          if (error.response.data.message === "사용자를 찾을 수 없습니다.") {
+            isIdDuplicate.value.status = 404;
+            isIdDuplicate.value.msg = "";
+          }
+        } else {
+          isIdDuplicate.value.status = 500;
+          isIdDuplicate.value.msg = "서버 에러 등 기타 문제"; // 서버 에러 등 기타 문제
+        }
       }
     );
     return isIdDuplicate.value;
+  };
+  const checkNickNameDuplicate = async (userNickName) => {
+    const isNickNameDuplicate = ref({});
+    await findByNickName(
+      userNickName,
+      (response) => {
+        console.log("응답 성공:", response.data.message);
+        isNickNameDuplicate.value.status = 200; // 중복된 아이디
+        isNickNameDuplicate.value.msg = "해당 닉네임은 이미 존재합니다.";
+      },
+      (error) => {
+        console.error("응답 에러:", error.response.data.message);
+        if (error.response.status === 404) {
+          // 사용자 없음 메시지 확인
+          if (error.response.data.message === "사용자를 찾을 수 없습니다.") {
+            isNickNameDuplicate.value.status = 404;
+            isNickNameDuplicate.value.msg = "";
+          }
+        } else {
+          isNickNameDuplicate.value.status = 500;
+          isNickNameDuplicate.value.msg = "서버 에러 등 기타 문제"; // 서버 에러 등 기타 문제
+        }
+      }
+    );
+    return isNickNameDuplicate.value;
   };
 
   const getUserInfoById = async (userid) => {
     await findById(
       userid,
+      (response) => {
+        if (response.status === httpStatusCode.OK) {
+          userInfo.value = response.data.userInfo; // 유저 정보 업데이트
+        } else {
+          userInfo.value = null; // 유저 정보 없음
+          console.log("유저 정보 없음");
+        }
+      },
+      (error) => {
+        console.error("유저 정보 조회 실패:", error);
+      }
+    );
+  };
+  const getUserInfoByNickName = async (userNickName) => {
+    await findByNickName(
+      userNickName,
       (response) => {
         if (response.status === httpStatusCode.OK) {
           userInfo.value = response.data.userInfo; // 유저 정보 업데이트
@@ -193,6 +244,8 @@ export const useAuthStore = defineStore("authStore", () => {
     checkToken,
     userRegist,
     getUserInfoById,
+    getUserInfoByNickName,
     checkIdDuplicate,
+    checkNickNameDuplicate,
   };
 });

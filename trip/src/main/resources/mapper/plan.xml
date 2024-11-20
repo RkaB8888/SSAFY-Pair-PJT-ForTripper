@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.travel.demo.plan.model.mapper.PlanMapper">
+    <insert id="planAdd" parameterType="PlanDomain">
+        insert into plans
+            (user_id, plan_title, start_date, end_date, total_date, description)
+        values
+            (#{user_id}, #{plan_title}, #{start_date}, #{end_date}, (select DATEDIFF(#{end_date}, #{start_date}) + 1), #{description})
+    </insert>
+
+    <select id="findPlanByID" parameterType="long" resultType="PlanListResponse">
+        select plan_id, plan_title, start_date, end_date, total_date, description
+        from plans
+        where user_id = #{user_id}
+        order by start_date
+    </select>
+
+<!--    Plan 저장 예시-->
+<!--    INSERT INTO Plan (userID, column1, column2, ...)-->
+<!--    VALUES (-->
+<!--    (SELECT userID FROM User WHERE email = #{email}),-->
+<!--    #{column1Value},-->
+<!--    #{column2Value},-->
+<!--    ...-->
+<!--    );-->
+
+</mapper>

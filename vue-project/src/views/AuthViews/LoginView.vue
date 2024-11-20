@@ -6,7 +6,7 @@ import { storeToRefs } from "pinia";
 
 const authStore = useAuthStore();
 const { isLogin, isLoginError } = storeToRefs(authStore);
-const { userLogin, getUserInfo } = authStore;
+const { userLogin, checkToken } = authStore;
 // 상태 관리
 const router = useRouter();
 const emailError = ref("");
@@ -57,7 +57,7 @@ const login = async () => {
     await userLogin(loginUser.value);
     if (isLogin.value) {
       const token = sessionStorage.getItem("accessToken");
-      await getUserInfo(token);
+      await checkToken(token);
       router.replace("/");
     }
   } else {

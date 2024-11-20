@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const { VITE_TRIP_API_URL } = import.meta.env;
-
 // local vue api axios instance
 function localAxios() {
   const instance = axios.create({

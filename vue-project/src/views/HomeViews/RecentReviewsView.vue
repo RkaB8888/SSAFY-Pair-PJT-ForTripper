@@ -104,9 +104,9 @@ const posts = [
 
     <!-- Carousel -->
     <v-slide-group show-arrows>
-      <v-slide-item v-for="post in posts" :key="post.id">
+      <v-slide-group-item v-for="post in posts" :key="post.id">
         <RecentReviewView :post="post" />
-      </v-slide-item>
+      </v-slide-group-item>
     </v-slide-group>
   </div>
 </template>

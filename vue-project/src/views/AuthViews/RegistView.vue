@@ -1,69 +1,182 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore();
-const { checkIdDuplicate } = authStore;
+const { userRegist, checkIdDuplicate, checkNickNameDuplicate } = authStore;
+
 // 상태 관리
 const router = useRouter();
 const passwordConfirm = ref("");
 const emailError = ref("");
 const passwordError = ref("");
+const nameError = ref("");
 const nicknameError = ref("");
 const phoneError = ref("");
+const isEmailValid = ref(true);
+const isNickNameValid = ref(true);
+const isEmailChecked = ref(false); // 이메일 중복 확인 상태
+const isPasswordChecked = ref(false);
+const isNameChecked = ref(false);
+const isNickNameChecked = ref(false); // 닉네임 중복 확인 상태
+const isPhoneChecked = ref(true);
 
 //회원가입 정보
 const registInfo = ref({
   email: "",
   password: "",
   name: "",
-  nickname: "",
+  nickName: "",
   phone: "",
 });
 
+// 전화번호 포맷팅된 값 (입력 창에 표시될 값)
+const formattedPhone = computed({
+  get() {
+    const digits = registInfo.value.phone.replace(/\D/g, "");
+    if (digits.length <= 3) {
+      return digits;
+    } else if (digits.length <= 7) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    } else {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    }
+  },
+  set(value) {
+    registInfo.value.phone = value.replace(/\D/g, ""); // 숫자만 저장
+  },
+});
+
+// // 전화번호 입력 시 포맷팅 적용
+// const handlePhoneInput = () => {
+//   registInfo.value.phone = formatPhoneNumber(registInfo.value.phone);
+// };
+
 // 검증 함수
-const validate = () => {
-  emailError.value = validateEmail(registInfo.value.email)
-    ? ""
-    : "올바른 이메일 형식이 아닙니다.";
-  passwordError.value =
-    registInfo.value.password !== passwordConfirm.value
-      ? "비밀번호가 다릅니다."
-      : "";
-  nicknameError.value =
-    registInfo.value.nickname === "NickName" ? "이미 존재하는 닉네임" : "";
-  phoneError.value = validatePhone(registInfo.value.phone)
-    ? ""
-    : registInfo.value.phone
-    ? "올바른 형식이 아닙니다."
-    : "";
+const emailStringCheck = () => {
+  return /\S+@\S+\.\S+/.test(registInfo.value.email);
 };
-
-const validateEmail = (value) => /\S+@\S+\.\S+/.test(value);
-const validatePhone = (value) => /^010\d{8}$/.test(value);
-
-const checkId = async () => {
-  const isEmailValid = validateEmail(registInfo.value.email);
-  if (isEmailValid && !(await checkIdDuplicate(registInfo.value.email))) {
-    console.log("가능");
+const validateEmail = () => {
+  emailError.value = emailStringCheck() ? "" : "올바른 이메일 형식이 아닙니다.";
+};
+const validateName = () => {
+  if (registInfo.value.name) {
+    isNameChecked.value = true;
+    nameError.value = "";
   } else {
-    console.log("불가능");
+    isNameChecked.value = false;
+    nameError.value = "이름을 입력해주세요.";
   }
 };
-// const login = async () => {
-//   const isEmailValid = validateEmail();
-//   const isPasswordValid = validatePassword();
-//   if (isEmailValid && isPasswordValid) {
-//     await userLogin(loginUser.value);
-//     if (isLogin.value) {
-//       const token = sessionStorage.getItem("accessToken");
-//       await getUserInfo(token);
-//       router.replace("/");
-//     }
-//   } else {
-//     console.error("로그인 실패: 입력 값 확인 필요");
-//   }
-// };
+const validateNickName = () => {
+  const nicknameLength = Array.from(registInfo.value.nickName).length;
+  // 검증 로직
+  if (!registInfo.value.nickName) {
+    nicknameError.value = "닉네임을 입력해주세요.";
+    return false;
+  } else if (nicknameLength < 3) {
+    nicknameError.value = "닉네임은 최소 3자 이상이어야 합니다.";
+    return false;
+  } else if (nicknameLength > 15) {
+    nicknameError.value = "닉네임은 최대 15자 이하이어야 합니다.";
+    return false;
+  } else {
+    nicknameError.value = ""; // 유효한 경우 에러 메시지 없음
+    return true;
+  }
+};
+const validatePhone = () => {
+  if (/^\d{3}-\d{3,4}-\d{4}$/.test(formattedPhone.value)) {
+    phoneError.value = "";
+    isPhoneChecked.value = true;
+  } else if (registInfo.value.phone) {
+    phoneError.value = "올바른 형식이 아닙니다.";
+    isPhoneChecked.value = false;
+  } else {
+    phoneError.value = "";
+    isPhoneChecked.value = true;
+  }
+};
+const validatePassword = () => {
+  if (!passwordConfirm.value) {
+    isPasswordChecked.value = false;
+  } else if (registInfo.value.password !== passwordConfirm.value) {
+    passwordError.value = "비밀번호가 다릅니다.";
+    isPasswordChecked.value = false;
+  } else {
+    passwordError.value = "";
+    isPasswordChecked.value = true;
+  }
+};
+
+const checkEmail = async () => {
+  isEmailValid.value = emailStringCheck();
+  if (isEmailValid.value) {
+    const response = await checkIdDuplicate(registInfo.value.email);
+    if (response.status === 200) {
+      isEmailChecked.value = false; // 사용 불가능한 상태로 유지
+    } else if (response.status === 404) {
+      isEmailChecked.value = true; // 사용 가능한 상태로 변경
+      console.log("가능한 아이디");
+    } else {
+      isEmailChecked.value = false;
+    }
+    emailError.value = response.msg;
+  } else {
+    console.log("형식에 안 맞음");
+  }
+};
+const checkNickName = async () => {
+  registInfo.value.nickName = registInfo.value.nickName.trim();
+  if (validateNickName()) {
+    const response = await checkNickNameDuplicate(
+      registInfo.value.nickName.trim()
+    );
+    if (response.status === 200) {
+      isNickNameChecked.value = false;
+      isNickNameValid.value = false;
+    } else if (response.status === 404) {
+      isNickNameChecked.value = true;
+      isNickNameValid.value = true;
+      console.log("가능한 닉네임");
+    } else {
+      isNickNameChecked.value = false;
+      isNickNameValid.value = false;
+    }
+    nicknameError.value = response.msg;
+  } else {
+    isNickNameChecked.value = false;
+  }
+};
+
+// 입력값 변경 감지 (이메일과 닉네임)
+watch(
+  () => registInfo.value.email,
+  () => {
+    isEmailChecked.value = false; // 이메일 변경 시 버튼 상태 초기화
+  }
+);
+
+watch(
+  () => registInfo.value.nickName,
+  () => {
+    isNickNameChecked.value = false; // 닉네임 변경 시 버튼 상태 초기화
+  }
+);
+
+const registConfirm = async () => {
+  if (
+    isEmailChecked.value &&
+    isPasswordChecked.value &&
+    isNameChecked.value &&
+    isNickNameChecked.value &&
+    isPhoneChecked.value
+  ) {
+    await userRegist(registInfo.value);
+  } else {
+    alert("입력 값을 확인해 주세요.");
+  }
+};
 
 // 로그인 페이지로 이동
 const navigateToLogin = () => {
@@ -89,11 +202,16 @@ const navigateToLogin = () => {
                 dense
                 v-model="registInfo.email"
                 :error-messages="emailError"
-                @blur="validate"
+                @blur="validateEmail"
               />
-              <v-btn small class="check-btn" outlined @click="checkId"
-                >중복 확인</v-btn
-              >
+              <v-btn
+                small
+                class="check-btn"
+                outlined
+                :color="isEmailChecked ? 'success' : 'primary'"
+                @click="checkEmail"
+                >{{ isEmailChecked ? "사용 가능" : "중복 확인" }}
+              </v-btn>
             </div>
 
             <!-- 비밀번호 -->
@@ -104,6 +222,7 @@ const navigateToLogin = () => {
               outlined
               dense
               v-model="registInfo.password"
+              @blur="validatePassword"
             />
             <v-text-field
               label="비밀번호 확인"
@@ -113,7 +232,7 @@ const navigateToLogin = () => {
               dense
               v-model="passwordConfirm"
               :error-messages="passwordError"
-              @blur="validate"
+              @blur="validatePassword"
             />
 
             <!-- 이름 입력 -->
@@ -123,6 +242,8 @@ const navigateToLogin = () => {
               outlined
               dense
               v-model="registInfo.name"
+              :error-messages="nameError"
+              @blur="validateName"
             />
 
             <!-- 닉네임 입력 -->
@@ -132,11 +253,18 @@ const navigateToLogin = () => {
                 placeholder="NickName"
                 outlined
                 dense
-                v-model="registInfo.nickname"
+                v-model="registInfo.nickName"
                 :error-messages="nicknameError"
-                @blur="validate"
               />
-              <v-btn small class="check-btn" outlined>중복 확인</v-btn>
+              <v-btn
+                small
+                class="check-btn"
+                outlined
+                :color="isNickNameChecked ? 'success' : 'primary'"
+                @click="checkNickName"
+              >
+                {{ isNickNameChecked ? "사용 가능" : "중복 확인" }}
+              </v-btn>
             </div>
 
             <!-- 휴대폰 입력 -->
@@ -145,13 +273,19 @@ const navigateToLogin = () => {
               placeholder="01012345678"
               outlined
               dense
-              v-model="registInfo.phone"
+              v-model="formattedPhone"
               :error-messages="phoneError"
-              @blur="validate"
+              @blur="validatePhone"
             />
 
             <!-- 회원가입 버튼 -->
-            <v-btn :color="'#FF7043'" class="signup-btn" block large>
+            <v-btn
+              :color="'#FF7043'"
+              class="signup-btn"
+              block
+              large
+              @click="registConfirm"
+            >
               회원가입
             </v-btn>
           </v-card-text>
