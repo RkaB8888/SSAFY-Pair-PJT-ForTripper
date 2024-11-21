@@ -4,6 +4,15 @@ import { httpStatusCode } from "./http-status";
 import { useAuthStore } from "@/stores/auth";
 
 const { VITE_TRIP_API_URL } = import.meta.env;
+
+// 토큰 재발급 실패 여부를 추적하는 플래그 (모듈 스코프 변수로 선언)
+let tokenRefreshFailed = false;
+
+// tokenRefreshFailed 플래그를 초기화하는 함수
+export function resetTokenRefreshFailed() {
+  tokenRefreshFailed = false;
+}
+
 // local vue api axios instance
 function localAxios() {
   const instance = axios.create({
@@ -54,9 +63,16 @@ function localAxios() {
         // `/users/refresh` 요청 자체가 실패한 경우
         if (originalRequest.url.includes("/users/refresh")) {
           console.error("리프레시 토큰 만료");
-          // sessionStorage.clear();
-          // router.push({ name: "login" });
-          return Promise.reject(error);
+          tokenRefreshFailed = true; // 토큰 재발급 실패 플래그 설정
+          sessionStorage.clear();
+          alert("로그인이 필요합니다.");
+          router.push({ name: "login" });
+          return;
+        }
+
+        if (tokenRefreshFailed) {
+          // 이미 토큰 재발급이 실패한 경우, 추가 처리 없이 거절
+          return;
         }
 
         //토큰 재발급 요청
@@ -83,20 +99,26 @@ function localAxios() {
             requestQueue.forEach((req) => req.reject(refreshError));
             requestQueue = [];
             isTokenRefreshing = false;
+            tokenRefreshFailed = true; // 토큰 재발급 실패 플래그 설정
 
             sessionStorage.clear();
             alert("로그인이 필요합니다.");
             router.push({ name: "login" }); // Vue Router로 로그인 페이지로 이동
-            return Promise.reject(refreshError);
+            return;
           }
         }
 
         return new Promise((resolve, reject) => {
           requestQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return instance(originalRequest);
-        });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return instance(originalRequest);
+          })
+          .catch((err) => {
+            // 토큰 재발급 실패 시 요청 거절
+            return;
+          });
       }
 
       //잘못된 접근

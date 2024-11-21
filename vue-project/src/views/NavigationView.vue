@@ -1,13 +1,14 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { computed } from "vue";
 
 // Vue Router 사용
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
 
 // 반응형으로 상태 감시
-
+const isLogin = computed(() => authStore.isLogin);
 // 로그아웃 함수
 const isLogout = () => {
   authStore.userLogout(); // 로그아웃 실행
@@ -35,7 +36,7 @@ const navigateTo = (path) => {
 
       <!-- Right Side: 로그인/회원가입 또는 다른 메뉴 -->
       <div class="right-section d-flex align-center">
-        <template v-if="!authStore.isLogin">
+        <template v-if="!isLogin">
           <!-- 비로그인 상태 -->
           <v-btn outlined class="nav-btn" @click="navigateTo('/auth/login')">
             로그인

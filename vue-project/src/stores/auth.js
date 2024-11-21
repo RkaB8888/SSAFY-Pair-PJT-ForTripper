@@ -12,7 +12,7 @@ import {
   checkByToken,
 } from "@/api/authApi";
 import { httpStatusCode } from "@/util/http-status";
-
+import { resetTokenRefreshFailed } from "@/util/http-commons";
 export const useAuthStore = defineStore("authStore", () => {
   const router = useRouter();
 
@@ -25,8 +25,7 @@ export const useAuthStore = defineStore("authStore", () => {
     const token = sessionStorage.getItem("accessToken");
     if (token) {
       try {
-        await checkToken(token); // 토큰 유효성 확인
-        isLogin.value = true; // 토큰 유효하면 로그인 상태로 설정
+        await checkToken(); // 토큰 유효성 확인
       } catch (error) {
         console.error("토큰 검증 실패:", error);
         isLogin.value = false;
@@ -68,6 +67,8 @@ export const useAuthStore = defineStore("authStore", () => {
           isValidToken.value = true; //토큰 유효함
           sessionStorage.setItem("accessToken", accessToken);
           sessionStorage.setItem("refreshToken", refreshToken);
+
+          resetTokenRefreshFailed(); // 토큰 재발급 실패 플래그 초기화
         }
       },
       (error) => {
@@ -87,36 +88,18 @@ export const useAuthStore = defineStore("authStore", () => {
     isValidToken.value = false;
     sessionStorage.clear();
     alert("로그아웃 되었습니다.");
-    // await logout(
-    //   userInfo.value.email,
-    //   (response) => {
-    //     if (response.status === httpStatusCode.OK) {
-    //       isLogin.value = false;
-    //       userInfo.value = {};
-    //       isValidToken.value = false;
-
-    //       sessionStorage.removeItem("accessToken"); //토큰 제거
-    //       sessionStorage.removeItem("refreshToken"); //토큰 제거
-    //     } else {
-    //       console.error("유저 정보 없음!!!!");
-    //     }
-    //   },
-    //   (error) => {
-    //     console.log(error);
-    //   }
-    // );
+    resetTokenRefreshFailed(); // 토큰 재발급 실패 플래그 초기화
   };
   const tokenRegenerate = async () => {
     const refreshToken = sessionStorage.getItem("refreshToken");
     console.log("토큰 재발급 시작");
     // Refresh Token이 없는 경우
     if (!refreshToken) {
-      alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
       isLogin.value = false;
       userInfo.value = {};
       isValidToken.value = false;
       sessionStorage.clear();
-      router.push({ name: "login" });
+      // 알림 및 리다이렉트 제거
       return;
     }
 
@@ -130,26 +113,28 @@ export const useAuthStore = defineStore("authStore", () => {
         }
       },
       async (error) => {
-        if (error.response.status === httpStatusCode.UNAUTHORIZED) {
-          console.log("리프레시 만료");
-          alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
-        } else {
-          console.log("비정상 토큰");
-          alert("로그인 세션 비정상! 로그아웃 합니다.");
-        }
+        console.log("auth.js tokenRegeneration", error);
         isLogin.value = false;
         userInfo.value = {};
         isValidToken.value = false;
         sessionStorage.clear();
-        router.push({ name: "login" });
+        // 알림 및 리다이렉트 제거
+        return;
       }
     );
   };
-  const checkToken = async (token) => {
+  const checkToken = async () => {
+    const token = sessionStorage.getItem("accessToken");
     if (token) {
       try {
-        let decodeToken = jwtDecode(token);
-        console.log("디코딩 토큰:", decodeToken);
+        const decodedToken = jwtDecode(token);
+        console.log("디코딩 토큰:", decodedToken);
+
+        // JWT 토큰의 페이로드에서 사용자 식별자 필드 확인 (예: email 또는 sub)
+        const userId = decodedToken.id;
+        if (!userId) {
+          throw new Error("Token does not contain user identifier");
+        }
 
         // 토큰 검증
         await checkByToken(
@@ -157,18 +142,21 @@ export const useAuthStore = defineStore("authStore", () => {
             if (response.status === httpStatusCode.OK) {
               console.log("checkByToken 응답 성공:");
               isValidToken.value = true;
-              await getUserInfoById(decodeToken.id);
+              isLogin.value = true; // 로그인 상태로 설정
+              await getUserInfoById(userId);
               console.log("getUserInfoById 이후 :", userInfo.value);
             } else {
               console.warn("checkByToken 응답 실패");
               userInfo.value = {};
               isValidToken.value = false;
+              isLogin.value = false; // 로그인 상태 해제
               sessionStorage.clear();
             }
           },
           (error) => {
             console.error("checkByToken 에러:", error);
             isValidToken.value = false;
+            isLogin.value = false; // 로그인 상태 해제
             sessionStorage.clear();
           }
         );
@@ -176,10 +164,15 @@ export const useAuthStore = defineStore("authStore", () => {
         console.error("checkToken 실패:", error);
         userInfo.value = {};
         isValidToken.value = false;
+        isLogin.value = false; // 로그인 상태 해제
         sessionStorage.clear();
       }
     } else {
       console.log("토큰이 존재하지 않음");
+      isValidToken.value = false;
+      isLogin.value = false; // 로그인 상태 해제
+      userInfo.value = {};
+      // API 호출 없이 종료
     }
   };
   const checkIdDuplicate = async (userid) => {

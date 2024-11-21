@@ -39,13 +39,20 @@ public class MemberController {
         return ResponseEntity.ok(Map.of("message", "중복된 닉네임입니다.", "status", 200));
     }
     @GetMapping("/validate")
-    public ResponseEntity<?> validateAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
-    	System.out.println("토큰 검사 요청 받음");
-    	System.out.println("AccessToken: "+authorizationHeader);
-    	String token = authorizationHeader.substring(7); // "Bearer " 제거
-        if (!authService.isValid(token)) {
+    public ResponseEntity<?> validateAccessToken(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        System.out.println("토큰 검사 요청 받음");
+        System.out.println("AccessToken: " + authorizationHeader);
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
         }
+
+        String token = authorizationHeader.substring(7); // "Bearer " 제거
+
+        if (token.equals("null") || !authService.isValid(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+        }
+
         return ResponseEntity.ok("Valid Token");
     }
     
