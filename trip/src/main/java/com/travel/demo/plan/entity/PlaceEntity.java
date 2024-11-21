@@ -2,10 +2,12 @@ package com.travel.demo.plan.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Data
 public class PlaceEntity {
     //    방문 장소 ID (PK)	visit_id	bigint(20)	NOT NULL
 //    플랜 ID (FK)	plan_id	bigint(20)	NOT NULL
@@ -20,7 +22,7 @@ public class PlaceEntity {
 //    순서	visit_order	int	NOT NULL
     @NotBlank(message = "google place의 id가 입력됩니다.")
     @Schema(description = "Google Place API의 Place ID (특정 장소에 대한 ID)", example = "ChIJQdQyeiZu5kcRUfQHfB-OCLA")
-    private String id;
+    private String visit_google_id;
 
     @NotBlank(message = "화면에 표시될 장소 이름이 입력됩니다.")
     @Schema(description = "특정 장소에 대한 이름", example = "국립중앙박물관")

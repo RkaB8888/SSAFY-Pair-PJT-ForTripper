@@ -2,7 +2,7 @@ package com.travel.demo.plan.controller;
 
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.plan.dto.PlanListResponse;
-import com.travel.demo.plan.dto.PlaceEditRequest;
+import com.travel.demo.plan.dto.PlaceListDTO;
 import com.travel.demo.plan.model.service.PlanService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +30,13 @@ public class PlanController {
 
     //특정 계획 불러오기
     @GetMapping("/{plan_id}")
-    public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable long plan_id) {
+    public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable long plan_id) throws Exception {
         System.out.println("planDetail 호출! plan_id는 " + plan_id);
-        String token = request.getHeader("Authrization");
-        planService.findVisitPlacesByPlanId(token, plan_id);
-        return (ResponseEntity<?>) ResponseEntity.ok();
+        String token = request.getHeader("Authorization");
+        System.out.println(token);
+        PlaceListDTO dto = planService.findVisitPlacesByPlanId(token, plan_id);
+        System.out.println("얘 내보낼거임: "  + dto);
+        return (ResponseEntity<?>) ResponseEntity.ok(dto);
     }
 
     //계획 생성
@@ -58,12 +60,12 @@ public class PlanController {
 
     //계획 수정
     @PostMapping("/{plan_id}/edit")
-    public ResponseEntity<?> edit(@PathVariable long plan_id, @RequestBody PlaceEditRequest dailySchedules,
+    public ResponseEntity<?> edit(@PathVariable long plan_id, @RequestBody PlaceListDTO dailySchedules,
                                   @RequestHeader("Authorization") String token) {
         try {
-            System.out.println("스케줄 서버 저장 요청!");
+            System.out.println("스케줄 서버 저장 요청! plan_id는: " + plan_id);
             System.out.println(dailySchedules);
-
+            planService.addVisitPlaces(token, plan_id, dailySchedules);
             // DB에 수정 반영
             // 성공 시 200 OK 반환
             return ResponseEntity.ok().build();

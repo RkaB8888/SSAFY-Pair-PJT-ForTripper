@@ -16,12 +16,30 @@
         order by start_date
     </select>
 
-    <select id="findVisitPlacesByPlanId" parameterType="long" resultType="PlaceListResponse">
-        select visit_google_id, display_name, address, phone_number, latitude, longitude, visit_date, visit_order
-        from places
+    <select id="findVisitPlacesByPlanId" parameterType="long" resultType="PlaceEntity">
+        select visit_google_id, display_name, address, latitude, longitude, phone_number, visit_date
+        from visit_places
         where plan_id = #{plan_id}
-        order by visit_date, visit_order
+        order by visit_order
     </select>
+
+    <select id="findUserIdByPlanID" parameterType="long" resultType="long">
+        select user_id
+        from plans
+        where plan_id = #{plan_id}
+    </select>
+
+    <delete id="deletePlaceAllByPlanID" parameterType="long">
+        delete from visit_places
+        where plan_id = #{plan_id}
+    </delete>
+
+    <insert id="addPlace" parameterType="PlaceDomain">
+        insert into visit_places
+            (plan_id, user_id, visit_google_id, display_name, latitude, longitude, address, phone_number, visit_date, visit_order)
+        values
+            (#{plan_id}, #{user_id}, #{visit_google_id}, #{display_name}, #{latitude}, #{longitude}, #{address}, #{phone_number}, #{visit_date}, #{visit_order})
+    </insert>
 
 <!--    Plan 저장 예시-->
 <!--    INSERT INTO Plan (userID, column1, column2, ...)-->
