@@ -10,17 +10,25 @@ import { storeToRefs } from "pinia";
 const onlyAuthUser = async (to, from, next) => {
   const authStore = useAuthStore();
   const { userInfo, isValidToken } = storeToRefs(authStore);
-  const { getUserInfo } = authStore;
-
+  const { checkToken } = authStore;
   let token = sessionStorage.getItem("accessToken");
 
-  if (userInfo.value != null && token) {
-    await getUserInfo(token);
-  }
-  if (!isValidToken.value || userInfo.value == null) {
+  try {
+    // 토큰이 있는 경우에만 유효성 검사
+    if (token) {
+      await checkToken(token); // checkToken은 비동기 함수
+    }
+    console.log("onlyAuthUser:", userInfo.value);
+    // 유효하지 않은 경우 로그인 페이지로 이동
+    if (!isValidToken.value || !userInfo.value) {
+      console.warn("유효하지 않은 사용자 상태, 로그인 페이지로 이동");
+      next({ name: "login" });
+    } else {
+      next(); // 정상적으로 페이지로 이동
+    }
+  } catch (error) {
+    console.error("토큰 검사 중 오류 발생:", error);
     next({ name: "login" });
-  } else {
-    next();
   }
 };
 
@@ -64,6 +72,7 @@ const router = createRouter({
     {
       path: "/search",
       name: "search",
+      beforeEnter: onlyAuthUser,
       component: SearchView,
     },
   ],

@@ -1,5 +1,12 @@
 <script setup>
+import { onMounted } from "vue";
 import NavigationView from "@/views/NavigationView.vue";
+import { useAuthStore } from "@/stores/auth";
+
+onMounted(async () => {
+  const authStore = useAuthStore();
+  await authStore.initializeAuthState(); // 상태 초기화
+});
 </script>
 
 <template>

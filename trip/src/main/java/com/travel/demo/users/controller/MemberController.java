@@ -1,6 +1,6 @@
 package com.travel.demo.users.controller;
 
-import com.travel.demo.users.dto.FindUserResponse;
+import com.travel.demo.users.domain.UserDomain;
 import com.travel.demo.users.dto.UserLoginRequest;
 import com.travel.demo.users.dto.UserSignUpRequest;
 import com.travel.demo.users.model.service.AuthService;
@@ -21,23 +21,32 @@ public class MemberController {
     //get
     @GetMapping("/email/{email}")
     public ResponseEntity<?> findById(@PathVariable("email") String email) {
-        FindUserResponse user = authService.findByEmail(email);
+    	UserDomain user = authService.findByEmail(email);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                  .body(Map.of("message", "사용자를 찾을 수 없습니다.", "status", 404));
         }
-        return ResponseEntity.ok(Map.of("message", "중복된 이메일입니다.", "status", 200));
+        return ResponseEntity.ok(Map.of("email",user.getEmail(),"name",user.getName(),"nickname",user.getNickName(),"role",user.getRole(), "status", 200));
     }
-  //get
     @GetMapping("/nickname/{nickname}")
     public ResponseEntity<?> findByNickName(@PathVariable("nickname") String nickname) {
     	System.out.println("전달 받은 닉네임 : "+nickname);
-        FindUserResponse user = authService.findByNickName(nickname);
+    	UserDomain user = authService.findByNickName(nickname);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                  .body(Map.of("message", "사용자를 찾을 수 없습니다.", "status", 404));
         }
         return ResponseEntity.ok(Map.of("message", "중복된 닉네임입니다.", "status", 200));
+    }
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
+    	System.out.println("토큰 검사 요청 받음");
+    	System.out.println("AccessToken: "+authorizationHeader);
+    	String token = authorizationHeader.substring(7); // "Bearer " 제거
+        if (!authService.isValid(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+        }
+        return ResponseEntity.ok("Valid Token");
     }
     
     //post
@@ -54,6 +63,33 @@ public class MemberController {
         Map<String, String> tokens = authService.login(loginInfo);
         if(tokens == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 잘못되었습니다.");
         return ResponseEntity.ok(tokens);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> validateRefreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        System.out.println("토큰 검사 요청 받음");
+    	System.out.println("RefreshToken: "+refreshToken);
+        if (refreshToken == null || refreshToken.isEmpty()) {
+        	System.out.println("POST 토큰 검사 오류");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is missing");
+        }
+
+        // Refresh Token 검증
+        if (!authService.isValid(refreshToken)) {
+        	System.out.println("POST 토큰 만료");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Refresh Token");
+        }
+
+        // 유효한 Refresh Token이면 새로운 Access Token 발급
+        String newAccessToken = authService.generateNewAccessToken(refreshToken);
+
+        if (newAccessToken == null) {
+        	System.out.println("새로운 액세스 토큰 발급 오류");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to generate Access Token");
+        }
+
+        // 새 Access Token 반환
+        return ResponseEntity.ok(Map.of("access-token", newAccessToken));
     }
     
     //delete

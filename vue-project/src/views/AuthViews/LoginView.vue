@@ -51,13 +51,16 @@ const mvRegist = () => {
 
 //로그인
 const login = async () => {
+  console.log("로그인 버튼 클릭");
   const isEmailValid = validateEmail();
   const isPasswordValid = validatePassword();
   if (isEmailValid && isPasswordValid) {
     await userLogin(loginUser.value);
     if (isLogin.value) {
+      console.log("로그인 성공 신호 받아서 토큰 체크로 간다.");
       const token = sessionStorage.getItem("accessToken");
       await checkToken(token);
+      console.log("토큰 검사 끝 메인페이지 이동");
       router.replace("/");
     }
   } else {

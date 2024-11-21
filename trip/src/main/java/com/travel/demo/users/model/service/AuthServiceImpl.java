@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.travel.demo.users.domain.UserDomain;
-import com.travel.demo.users.dto.FindUserResponse;
 import com.travel.demo.users.dto.UserLoginRequest;
 import com.travel.demo.users.dto.UserSignUpRequest;
 import com.travel.demo.users.entity.UserEntity;
@@ -36,7 +35,7 @@ public class AuthServiceImpl implements AuthService{
         userDomain.setEmail(userEntity.getEmail());
         userDomain.setNickName(userEntity.getNickName());
         userDomain.setRole(userEntity.getRole());
-        return jwtUtil.generateToken(userDomain);
+        return jwtUtil.generateAccessToken(userDomain);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class AuthServiceImpl implements AuthService{
         userDomain.setRole(userEntity.getRole());
         
      // Access Token 생성
-        String accessToken = jwtUtil.generateToken(userDomain);
+        String accessToken = jwtUtil.generateAccessToken(userDomain);
 
         // Refresh Token 생성
         String refreshToken = jwtUtil.generateRefreshToken(userDomain);
@@ -69,26 +68,45 @@ public class AuthServiceImpl implements AuthService{
     }
 
 	@Override
-	public FindUserResponse findByEmail(String email) {
+	public UserDomain findByEmail(String email) {
 		UserEntity userEntity = authMapper.findByEmail(email);
 		if(userEntity == null) return null;
 		
-		FindUserResponse findUserResponse = new FindUserResponse();
-		findUserResponse.setEmail(userEntity.getEmail());
-		findUserResponse.setName(userEntity.getName());
-		findUserResponse.setNickname(userEntity.getNickName());
-		return findUserResponse;
+		UserDomain userDomain = new UserDomain();
+		userDomain.setEmail(userEntity.getEmail());
+		userDomain.setName(userEntity.getName());
+		userDomain.setNickName(userEntity.getNickName());
+		userDomain.setRole(userEntity.getRole());
+		System.out.println("AuthService의 findByEmail 리턴 : "+userDomain);
+		return userDomain;
 	}
 
 	@Override
-	public FindUserResponse findByNickName(String nickname) {
+	public UserDomain findByNickName(String nickname) {
 		UserEntity userEntity = authMapper.findByNickName(nickname);
 		if(userEntity == null) return null;
 		
-		FindUserResponse findUserResponse = new FindUserResponse();
-		findUserResponse.setEmail(userEntity.getEmail());
-		findUserResponse.setName(userEntity.getName());
-		findUserResponse.setNickname(userEntity.getNickName());
-		return findUserResponse;
+		UserDomain userDomain = new UserDomain();
+		userDomain.setEmail(userEntity.getEmail());
+		userDomain.setName(userEntity.getName());
+		userDomain.setNickName(userEntity.getNickName());
+		return userDomain;
+	}
+
+	@Override
+	public boolean isValid(String token) {
+		return jwtUtil.isValid(token);
+	}
+
+	@Override
+	public String generateNewAccessToken(String refreshToken) {
+		//리프레시 토큰에서 아이디 추출
+		String email = jwtUtil.getIdFromToken(refreshToken);
+		//이메일로 유저 도메인 획득
+		UserDomain userDomain = findByEmail(email);
+		//유저 정보를 바탕으로 새로운 토큰 생성 및 반환
+		String accessToken = jwtUtil.generateAccessToken(userDomain);
+		System.out.println("새로 생성된 accessToken : "+accessToken);
+		return accessToken;
 	}
 }

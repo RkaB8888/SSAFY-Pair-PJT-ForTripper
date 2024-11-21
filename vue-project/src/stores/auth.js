@@ -7,7 +7,7 @@ import {
   findById,
   findByNickName,
   tokenRegeneration,
-  logout,
+  // logout,
   userRegister,
   checkByToken,
 } from "@/api/authApi";
@@ -19,7 +19,24 @@ export const useAuthStore = defineStore("authStore", () => {
   const isLogin = ref(false); //로그인 했는지 확인
   const isLoginError = ref(false); //로그인 에러가 있는지 확인
   const isValidToken = ref(false); //토큰 유효성 확인
-  const userInfo = ref(null); // 사용자 정보
+  const userInfo = ref({}); // 사용자 정보
+
+  const initializeAuthState = async () => {
+    const token = sessionStorage.getItem("accessToken");
+    if (token) {
+      try {
+        await checkToken(token); // 토큰 유효성 확인
+        isLogin.value = true; // 토큰 유효하면 로그인 상태로 설정
+      } catch (error) {
+        console.error("토큰 검증 실패:", error);
+        isLogin.value = false;
+        userInfo.value = {}; // 초기화
+      }
+    } else {
+      isLogin.value = false;
+      userInfo.value = {}; // 초기화
+    }
+  };
 
   const userRegist = async (registUser) => {
     await userRegister(
@@ -64,29 +81,47 @@ export const useAuthStore = defineStore("authStore", () => {
   };
 
   const userLogout = async () => {
-    console.log("로그아웃 아이디 : " + userInfo.value.email);
-    await logout(
-      userInfo.value.email,
-      (response) => {
-        if (response.status === httpStatusCode.OK) {
-          isLogin.value = false;
-          userInfo.value = null;
-          isValidToken.value = false;
+    console.log(userInfo);
+    isLogin.value = false;
+    userInfo.value = {};
+    isValidToken.value = false;
+    sessionStorage.clear();
+    alert("로그아웃 되었습니다.");
+    // await logout(
+    //   userInfo.value.email,
+    //   (response) => {
+    //     if (response.status === httpStatusCode.OK) {
+    //       isLogin.value = false;
+    //       userInfo.value = {};
+    //       isValidToken.value = false;
 
-          sessionStorage.removeItem("accessToken"); //토큰 제거
-          sessionStorage.removeItem("refreshToken"); //토큰 제거
-        } else {
-          console.error("유저 정보 없음!!!!");
-        }
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+    //       sessionStorage.removeItem("accessToken"); //토큰 제거
+    //       sessionStorage.removeItem("refreshToken"); //토큰 제거
+    //     } else {
+    //       console.error("유저 정보 없음!!!!");
+    //     }
+    //   },
+    //   (error) => {
+    //     console.log(error);
+    //   }
+    // );
   };
   const tokenRegenerate = async () => {
+    const refreshToken = sessionStorage.getItem("refreshToken");
+    console.log("토큰 재발급 시작");
+    // Refresh Token이 없는 경우
+    if (!refreshToken) {
+      alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      isLogin.value = false;
+      userInfo.value = {};
+      isValidToken.value = false;
+      sessionStorage.clear();
+      router.push({ name: "login" });
+      return;
+    }
+
     await tokenRegeneration(
-      JSON.stringify(userInfo.value),
+      { refreshToken },
       (response) => {
         if (response.status === httpStatusCode.OK) {
           let accessToken = response.data["access-token"];
@@ -95,69 +130,64 @@ export const useAuthStore = defineStore("authStore", () => {
         }
       },
       async (error) => {
-        // HttpStatus.UNAUTHORIZE(401) : RefreshToken 기간 만료 >> 다시 로그인!!!!
         if (error.response.status === httpStatusCode.UNAUTHORIZED) {
-          // 다시 로그인 전 DB에 저장된 RefreshToken 제거.
-          await logout(
-            userInfo.value.email,
-            (response) => {
-              if (response.status === httpStatusCode.OK) {
-                console.log("리프레시 토큰 제거 성공");
-              } else {
-                console.log("리프레시 토큰 제거 실패");
-              }
-              alert("RefreshToken 기간 만료!!! 다시 로그인해 주세요.");
-              isLogin.value = false;
-              userInfo.value = null;
-              isValidToken.value = false;
-              router.push({ name: "login" });
-            },
-            (error) => {
-              console.error(error);
-              isLogin.value = false;
-              userInfo.value = null;
-            }
-          );
+          console.log("리프레시 만료");
+          alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
+        } else {
+          console.log("비정상 토큰");
+          alert("로그인 세션 비정상! 로그아웃 합니다.");
         }
+        isLogin.value = false;
+        userInfo.value = {};
+        isValidToken.value = false;
+        sessionStorage.clear();
+        router.push({ name: "login" });
       }
     );
   };
   const checkToken = async (token) => {
-    console.log("checkToken 진입");
-    console.log("encodeToken 값 확인:", token);
-    let decodeToken = jwtDecode(token);
-    console.log("1111111");
-    console.log(decodeToken);
-    await checkByToken(
-      decodeToken.id,
-      (response) => {
-        if (response.status === httpStatusCode.OK) {
-          userInfo.value = response.data.userInfo;
-          console.log("응답 성공");
-        } else {
-          userInfo.value = null;
-          console.log("유저 정보 없음!!!!");
-        }
-      },
-      async (error) => {
-        console.log("에러");
-        console.error(
-          "g[토큰 만료되어 사용 불가능.] : ",
-          error.response.status,
-          error.response.statusText
-        );
-        isValidToken.value = false;
+    if (token) {
+      try {
+        let decodeToken = jwtDecode(token);
+        console.log("디코딩 토큰:", decodeToken);
 
-        await tokenRegenerate();
+        // 토큰 검증
+        await checkByToken(
+          async (response) => {
+            if (response.status === httpStatusCode.OK) {
+              console.log("checkByToken 응답 성공:");
+              isValidToken.value = true;
+              await getUserInfoById(decodeToken.id);
+              console.log("getUserInfoById 이후 :", userInfo.value);
+            } else {
+              console.warn("checkByToken 응답 실패");
+              userInfo.value = {};
+              isValidToken.value = false;
+              sessionStorage.clear();
+            }
+          },
+          (error) => {
+            console.error("checkByToken 에러:", error);
+            isValidToken.value = false;
+            sessionStorage.clear();
+          }
+        );
+      } catch (error) {
+        console.error("checkToken 실패:", error);
+        userInfo.value = {};
+        isValidToken.value = false;
+        sessionStorage.clear();
       }
-    );
+    } else {
+      console.log("토큰이 존재하지 않음");
+    }
   };
   const checkIdDuplicate = async (userid) => {
     const isIdDuplicate = ref({});
     await findById(
       userid,
       (response) => {
-        console.log("응답 성공:", response.data.message);
+        console.log("응답 성공:", response.data.status);
         isIdDuplicate.value.status = 200; // 중복된 아이디
         isIdDuplicate.value.msg = "해당 이메일은 이미 존재합니다.";
       },
@@ -208,9 +238,15 @@ export const useAuthStore = defineStore("authStore", () => {
       userid,
       (response) => {
         if (response.status === httpStatusCode.OK) {
-          userInfo.value = response.data.userInfo; // 유저 정보 업데이트
+          userInfo.value = {
+            email: response.data.email,
+            name: response.data.name,
+            nickname: response.data.nickname,
+            role: response.data.role,
+          };
+          console.log("유저 정보 저장 :", userInfo.value);
         } else {
-          userInfo.value = null; // 유저 정보 없음
+          userInfo.value = {}; // 유저 정보 없음
           console.log("유저 정보 없음");
         }
       },
@@ -226,7 +262,7 @@ export const useAuthStore = defineStore("authStore", () => {
         if (response.status === httpStatusCode.OK) {
           userInfo.value = response.data.userInfo; // 유저 정보 업데이트
         } else {
-          userInfo.value = null; // 유저 정보 없음
+          userInfo.value = {}; // 유저 정보 없음
           console.log("유저 정보 없음");
         }
       },
@@ -236,6 +272,7 @@ export const useAuthStore = defineStore("authStore", () => {
     );
   };
   return {
+    initializeAuthState,
     isLogin,
     isLoginError,
     userLogin,
@@ -247,5 +284,7 @@ export const useAuthStore = defineStore("authStore", () => {
     getUserInfoByNickName,
     checkIdDuplicate,
     checkNickNameDuplicate,
+    userInfo,
+    isValidToken,
   };
 });

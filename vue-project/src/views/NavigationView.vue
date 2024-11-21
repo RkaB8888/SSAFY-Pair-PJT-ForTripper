@@ -6,9 +6,11 @@ import { useAuthStore } from "@/stores/auth";
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
 
+// 반응형으로 상태 감시
+
 // 로그아웃 함수
 const isLogout = () => {
-  authStore.logout(); // 로그아웃 실행
+  authStore.userLogout(); // 로그아웃 실행
   navigateTo("/"); // 홈 화면으로 이동
 };
 
