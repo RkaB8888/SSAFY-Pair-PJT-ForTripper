@@ -1,56 +1,78 @@
 package com.travel.demo.plan.controller;
 
-import com.travel.demo.plan.dto.PlanDto;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.travel.demo.plan.dto.PlanAddRequest;
+import com.travel.demo.plan.dto.PlanListResponse;
+import com.travel.demo.plan.dto.PlaceListDTO;
+import com.travel.demo.plan.model.service.PlanService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller
-@RequestMapping("/basic/plans")
+import java.util.List;
+
+@RestController
+@RequestMapping("/plans")
+@RequiredArgsConstructor
 public class PlanController {
 
-    @GetMapping
-//    public String planMain(@SessionAttribute(name = "userId", required = false) long userId) {
-    public String planMain() {
-        //userId가 null(로그인을 하지 않음)일 경우 로그인 페이지로 이동하도록 함
+    private final PlanService planService;
 
-        //userId가 null이 아닐 경우 여행 계획 리스트 띄워 줌
-        return "basic/plans";
+    //계획 목록 불러오기
+    @GetMapping("/")
+    public ResponseEntity<?> planList(HttpServletRequest request) {
+        System.out.println("planList 호출!");
+        String token = request.getHeader("Authorization");
+        List<PlanListResponse> list = planService.findListByID(token);
+        return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/add")
-    public String planAdd() {
-        return "basic/plans/add";
+    //특정 계획 불러오기
+    @GetMapping("/{plan_id}")
+    public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable long plan_id) throws Exception {
+        System.out.println("planDetail 호출! plan_id는 " + plan_id);
+        String token = request.getHeader("Authorization");
+        System.out.println(token);
+        PlaceListDTO dto = planService.findVisitPlacesByPlanId(token, plan_id);
+        System.out.println("얘 내보낼거임: "  + dto);
+        return (ResponseEntity<?>) ResponseEntity.ok(dto);
     }
 
+    //계획 생성
     @PostMapping("/add")
-    public String planAdd(@ModelAttribute PlanDto planDto, RedirectAttributes redirectAttributes) {
-        //DB에 planDto 저장
-        //생성된 planDto에서 plan_id 갖고옴
-        //redirectAttribute에 데이터 전달
-
+    public String planAdd(HttpServletRequest request, @RequestBody PlanAddRequest planInfo) {
+        System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
+        String token = request.getHeader("Authorization");
+        planService.PlanAdd(token, planInfo);
+        System.out.println(planInfo);
+        //토큰 파싱
+        //입력된 PlanDto DB에 저장
         return "redirect:/basic/plans/{plan_id}";
     }
 
-
-    //계획 조회
-    @GetMapping("/{plan_id}")
-    public String plan() {
-
-        return "basic/plan";
-    }
-
+    //계획 수정 화면 불러오기
     @GetMapping("/{plan_id}/edit")
-    public String editPlan(@PathVariable long plan_id, Model model) {
-        //plan_id로 DB에서 plan 정보 찾아옴
-        //model에 plan을 addAttribute
-        return "basic/editForm";
-    }
-
-    @PostMapping("/{plan_id}/edit")
-    public String edit(@PathVariable long plan_id, @ModelAttribute PlanDto plan) {
+    public String editPage(@PathVariable long plan_id, @ModelAttribute PlanAddRequest plan) {
         //DB에 수정 반영
         return "redirect:/basic/plans/{plan_id}";
+    }
+
+    //계획 수정
+    @PostMapping("/{plan_id}/edit")
+    public ResponseEntity<?> edit(@PathVariable long plan_id, @RequestBody PlaceListDTO dailySchedules,
+                                  @RequestHeader("Authorization") String token) {
+        try {
+            System.out.println("스케줄 서버 저장 요청! plan_id는: " + plan_id);
+            System.out.println(dailySchedules);
+            planService.addVisitPlaces(token, plan_id, dailySchedules);
+            // DB에 수정 반영
+            // 성공 시 200 OK 반환
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
     }
 }
