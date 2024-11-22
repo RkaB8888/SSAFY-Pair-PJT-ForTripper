@@ -10,6 +10,8 @@ import {
   // logout,
   userRegister,
   checkByToken,
+  resetPasswordRequest,
+  resetPassword,
 } from "@/api/authApi";
 import { httpStatusCode } from "@/util/http-status";
 import { resetTokenRefreshFailed } from "@/util/http-commons";
@@ -86,6 +88,7 @@ export const useAuthStore = defineStore("authStore", () => {
   const userLogout = async () => {
     console.log(userInfo);
     isLogin.value = false;
+    isLoginError.value = false; // 로그인 에러 상태 초기화
     userInfo.value = {};
     isValidToken.value = false;
     sessionStorage.clear();
@@ -266,6 +269,30 @@ export const useAuthStore = defineStore("authStore", () => {
       }
     );
   };
+  const requestPasswordReset = async (email) => {
+    await resetPasswordRequest(
+      { email },
+      (response) => {
+        console.log("비밀번호 재설정 이메일 전송 성공:", response.data.message);
+      },
+      (error) => {
+        console.error("비밀번호 재설정 이메일 전송 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const handleResetPassword = async (token, newPassword) => {
+    await resetPassword(
+      { token, newPassword },
+      (response) => {
+        console.log("비밀번호 재설정 성공:", response.data.message);
+      },
+      (error) => {
+        console.error("비밀번호 재설정 실패:", error);
+        throw error;
+      }
+    );
+  };
   return {
     initializeAuthState,
     isLogin,
@@ -281,5 +308,7 @@ export const useAuthStore = defineStore("authStore", () => {
     checkNickNameDuplicate,
     userInfo,
     isValidToken,
+    requestPasswordReset,
+    handleResetPassword,
   };
 });

@@ -14,4 +14,6 @@ public  interface AuthService {
     boolean isValid(String token);
     String generateNewAccessToken(String refreshToken);
     boolean verifyEmail(String token);
+    boolean createPasswordResetToken(String email);
+    boolean resetPassword(String token, String newPassword);
 }

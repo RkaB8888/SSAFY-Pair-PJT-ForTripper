@@ -10,4 +10,5 @@ public interface AuthMapper {
     UserEntity findByEmail(String email);
     UserEntity findByNickName(String nickname);
     int updateUserVerificationStatus(UserEntity userEntity);
+    void updatePassword(UserEntity user);
 }

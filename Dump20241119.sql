@@ -102,4 +102,11 @@ CREATE TABLE `verification_tokens` (
     PRIMARY KEY (token),
     FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE
 );
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE password_reset_tokens (
+    token VARCHAR(255) PRIMARY KEY,
+    user_email VARCHAR(255) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    FOREIGN KEY (user_email) REFERENCES users(email) ON DELETE CASCADE
+);
 -- Dump completed on 2024-11-19 17:35:21

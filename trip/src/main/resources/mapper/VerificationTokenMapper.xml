@@ -10,12 +10,16 @@
         VALUES (#{token}, #{userEmail}, #{expiryDate})
     </insert>
 
-    <select id="findByToken" parameterType="String" resultType="com.travel.demo.users.entity.VerificationToken">
+    <select id="findByToken" parameterType="String" resultMap="VerificationTokenResultMap">
         SELECT * FROM verification_tokens WHERE token = #{token}
     </select>
 
     <delete id="deleteToken" parameterType="String">
         DELETE FROM verification_tokens WHERE token = #{token}
     </delete>
-
+<resultMap id="VerificationTokenResultMap" type="com.travel.demo.users.entity.VerificationToken">
+        <id property="token" column="token"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="expiryDate" column="expiry_date"/>
+    </resultMap>
 </mapper>

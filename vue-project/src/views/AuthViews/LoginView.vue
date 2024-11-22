@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
 
@@ -13,6 +13,11 @@ const emailError = ref("");
 const passwordError = ref("");
 const showPassword = ref(false); // 비밀번호 표시 토글
 // const rememberMe = ref(false); // 아이디 기억하기 상태
+
+// 로그인 페이지가 로드될 때 실행되는 로직
+onMounted(() => {
+  isLoginError.value = false; // 로그인 에러 상태 초기화
+});
 const loginUser = ref({
   email: "",
   password: "",
@@ -49,6 +54,11 @@ const mvRegist = () => {
   router.push("/auth/regist");
 };
 
+// 비밀번호 찾기 페이지로 이동
+const mvFindPassword = () => {
+  router.push("/auth/forgot-password");
+};
+
 //로그인
 const login = async () => {
   console.log("로그인 버튼 클릭");
@@ -79,6 +89,7 @@ const login = async () => {
             <h3>로그인</h3>
             <!-- 이메일 입력 -->
             <v-text-field
+              class="mt-2"
               label="이메일"
               placeholder="abc1234@naver.com"
               outlined
@@ -86,6 +97,7 @@ const login = async () => {
               v-model="loginUser.email"
               :error-messages="emailError"
               @blur="validateEmail"
+              @input="isLoginError = false"
             />
             <!-- 비밀번호 입력 -->
             <v-text-field
@@ -97,6 +109,7 @@ const login = async () => {
               v-model="loginUser.password"
               :error-messages="passwordError"
               class="password-field"
+              @input="isLoginError = false"
             >
               <v-btn
                 icon
@@ -117,11 +130,12 @@ const login = async () => {
                 max-width="150"
               ></v-checkbox>
             </div> -->
+
             <!-- 로그인 버튼 -->
             <v-btn
               @click="login"
               color="#1E88E5"
-              class="mt-4 login-btn"
+              class="mt-2 login-btn"
               block
               large
             >
@@ -133,15 +147,12 @@ const login = async () => {
           </v-card-text>
 
           <!-- 회원가입 버튼 -->
-          <v-card-actions class="signup-section">
-            <span>아직 계정이 없으신가요?</span>
-            <v-btn
-              color="primary"
-              outlined
-              class="signup-btn"
-              @click="mvRegist"
-            >
-              회원가입 하러 가기
+          <v-card-actions class="bottom-section">
+            <v-btn color="primary" class="" @click="mvFindPassword"
+              >비밀번호를 잊으셨나요?
+            </v-btn>
+            <v-btn color="primary" outlined class="" @click="mvRegist">
+              아직 계정이 없으신가요?
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -168,7 +179,7 @@ const login = async () => {
 }
 
 /* 회원가입 섹션 */
-.signup-section {
+.bottom-section {
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -71,6 +71,16 @@ const router = createRouter({
           beforeEnter: onlyAuthUser,
           component: () => import("@/views/UserViews/UserMyPage.vue"),
         },
+        {
+          path: "forgot-password",
+          name: "ForgotPassword",
+          component: () => import("@/views/UserViews/ForgotPasswordView.vue"),
+        },
+        {
+          path: "reset-password",
+          name: "ResetPassword",
+          component: () => import("@/views/UserViews/ResetPasswordView.vue"),
+        },
       ],
     },
     {
@@ -78,6 +88,11 @@ const router = createRouter({
       name: "search",
       beforeEnter: onlyAuthUser,
       component: SearchView,
+    },
+    {
+      path: "/auth/reset-password",
+      name: "ResetPassword",
+      component: () => import("@/views/UserViews/ResetPasswordView.vue"),
     },
   ],
 });

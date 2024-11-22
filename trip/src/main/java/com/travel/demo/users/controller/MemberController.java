@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +20,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
     private final AuthService authService;
-
+    
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+    
     //get
     @GetMapping("/email/{email}")
     public ResponseEntity<?> findById(@PathVariable("email") String email) {
@@ -57,11 +63,32 @@ public class MemberController {
     }
     @GetMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+    	System.out.println("인증 요청 받음");
         boolean isVerified = authService.verifyEmail(token);
         if (isVerified) {
-            return ResponseEntity.ok(Map.of("message", "이메일 인증이 완료되었습니다. 이제 로그인할 수 있습니다."));
+        	String asciiArt = "<div style=\"text-align: center; margin-top: 50px;\">\n" +
+                    "<pre style=\"font-family: monospace; font-size: 24px;\">\n" +
+                    " (\\_/)\n" +
+                    " ( •_•)\n" +
+                    " / >❤️\n" +
+                    "</pre>\n" +
+                    "<p style=\"font-size: 18px;\">이메일 인증이 완료되었습니다. 이제 로그인할 수 있습니다.</p>\n" +
+                    "<a href=\"" + frontendUrl + "/auth/login\" style=\"font-size: 18px;\">로그인 하러 가기</a>\n" +
+                    "</div>";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_VALUE)
+                    .body(asciiArt);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "유효하지 않거나 만료된 인증 링크입니다."));
+        	String errorPage = "<div style=\"text-align: center; margin-top: 50px;\">\n" +
+                    "<pre style=\"font-family: monospace; font-size: 24px; color: red;\">\n" +
+                    " (x_x)\n" +
+                    "</pre>\n" +
+                    "<h2>유효하지 않거나 만료된 인증 링크입니다.</h2>\n" +
+                    "<a href=\"" + frontendUrl + "/auth/resend\" style=\"font-size: 18px;\">인증 이메일 다시 받기</a>\n" +
+                    "</div>";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_VALUE)
+                    .body(errorPage);
         }
     }
     
@@ -109,6 +136,30 @@ public class MemberController {
 
         // 새 Access Token 반환
         return ResponseEntity.ok(Map.of("access-token", newAccessToken));
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        boolean isSuccess = authService.createPasswordResetToken(email);
+        if (isSuccess) {
+            return ResponseEntity.ok(Map.of("message", "비밀번호 재설정 이메일을 전송했습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body(Map.of("message", "해당 이메일의 사용자를 찾을 수 없습니다."));
+        }
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        boolean isSuccess = authService.resetPassword(token, newPassword);
+        if (isSuccess) {
+            return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 재설정되었습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(Map.of("message", "유효하지 않거나 만료된 토큰입니다."));
+        }
     }
     
     //delete

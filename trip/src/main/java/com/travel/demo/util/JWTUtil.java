@@ -20,8 +20,8 @@ public class JWTUtil {
 	@Value("${jwt.secret-key}")
 	private String secretKeyPlain;
 
-	private final long EXPIRATION_SECONDS = 1; // 토큰 유효기간 12시간
-	private static final int REFRESH_EXPIRATION_SECONDS = 5; // 7일
+	private final long EXPIRATION_SECONDS = 12*60*60; // 토큰 유효기간 12시간
+	private static final int REFRESH_EXPIRATION_SECONDS = 24*60*60*7; // 7일
 
 	// application.properties에 등록된 변수
 	public SecretKey getSecretKey() {

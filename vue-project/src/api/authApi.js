@@ -23,7 +23,12 @@ async function tokenRegeneration(param, success, fail) {
 async function userRegister(param, success, fail) {
   await local.post(`/users/join`, param).then(success).catch(fail);
 }
-
+async function resetPasswordRequest(param, success, fail) {
+  await local.post(`/users/forgot-password`, param).then(success).catch(fail);
+}
+async function resetPassword(param, success, fail) {
+  await local.post(`/users/reset-password`, param).then(success).catch(fail);
+}
 //delete
 // async function logout(param, success, fail) {
 //   await local.delete(`/users/logout/${param}`).then(success).catch(fail);
@@ -37,4 +42,6 @@ export {
   tokenRegeneration,
   // logout,
   userRegister,
+  resetPasswordRequest,
+  resetPassword,
 };

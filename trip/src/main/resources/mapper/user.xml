@@ -30,4 +30,9 @@
         SET is_verified = #{isVerified}
         WHERE email = #{email}
     </update>
+    
+    <update id="updatePassword" parameterType="com.travel.demo.users.entity.UserEntity">
+    	UPDATE users SET password = #{password} WHERE email = #{email}
+	</update>
+	
 </mapper>
