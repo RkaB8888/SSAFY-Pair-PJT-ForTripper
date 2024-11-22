@@ -16,4 +16,14 @@
         from users
         where email = #{email}
     </select>
+<<<<<<< HEAD
+=======
+    
+    <!-- 닉네임 찾기 -->
+    <select id="findByNickName" parameterType="string" resultType="UserEntity">
+        select *
+        from users
+        where nickname = #{nickName}
+    </select>
+>>>>>>> front
 </mapper>

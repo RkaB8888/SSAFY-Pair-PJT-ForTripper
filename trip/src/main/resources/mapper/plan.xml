@@ -16,6 +16,7 @@
         order by start_date
     </select>
 
+<<<<<<< HEAD
     <select id="findVisitPlacesByPlanId" parameterType="long" resultType="PlaceEntity">
         select visit_google_id, display_name, address, latitude, longitude, phone_number, visit_date
         from visit_places
@@ -41,6 +42,8 @@
             (#{plan_id}, #{user_id}, #{visit_google_id}, #{display_name}, #{latitude}, #{longitude}, #{address}, #{phone_number}, #{visit_date}, #{visit_order})
     </insert>
 
+=======
+>>>>>>> front
 <!--    Plan 저장 예시-->
 <!--    INSERT INTO Plan (userID, column1, column2, ...)-->
 <!--    VALUES (-->

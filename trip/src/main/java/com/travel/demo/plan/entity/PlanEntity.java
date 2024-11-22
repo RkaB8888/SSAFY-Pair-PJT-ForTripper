@@ -2,7 +2,6 @@ package com.travel.demo.plan.entity;
 
 import lombok.Data;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Data

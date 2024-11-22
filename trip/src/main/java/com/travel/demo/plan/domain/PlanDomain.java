@@ -14,3 +14,4 @@ public class PlanDomain {
     private int total_date;
     private String description;
 }
+

@@ -1,7 +1,6 @@
 package com.travel.demo.plan.model.service;
 
 import com.travel.demo.plan.dto.PlaceListDTO;
-import com.travel.demo.plan.dto.PlaceListResponse;
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.plan.dto.PlanListResponse;
 import org.springframework.web.bind.annotation.RequestBody;

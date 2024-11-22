@@ -2,8 +2,6 @@ package com.travel.demo.plan.model.mapper;
 
 import com.travel.demo.plan.domain.PlaceDomain;
 import com.travel.demo.plan.domain.PlanDomain;
-import com.travel.demo.plan.dto.PlaceListDTO;
-import com.travel.demo.plan.dto.PlaceListResponse;
 import com.travel.demo.plan.dto.PlanListResponse;
 import com.travel.demo.plan.entity.PlaceEntity;
 import org.apache.ibatis.annotations.Mapper;
