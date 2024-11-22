@@ -1,12 +1,8 @@
 package com.travel.demo.plan.model.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.travel.demo.place.model.mapper.PlaceMapper;
-import com.travel.demo.plan.controller.PlanController;
 import com.travel.demo.plan.domain.PlaceDomain;
 import com.travel.demo.plan.domain.PlanDomain;
 import com.travel.demo.plan.dto.PlaceListDTO;
-import com.travel.demo.plan.dto.PlaceListResponse;
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.plan.dto.PlanListResponse;
 import com.travel.demo.plan.entity.PlaceEntity;
