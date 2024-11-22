@@ -43,7 +43,9 @@ export const useAuthStore = defineStore("authStore", () => {
       (response) => {
         if (response.status === httpStatusCode.CREATE) {
           console.log("회원가입 성공!!!");
-          alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+          alert(
+            "회원가입이 완료되었습니다. 이메일을 확인하여 계정을 활성화하세요."
+          );
           router.push({ name: "login" });
         }
       },

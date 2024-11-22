@@ -13,4 +13,5 @@ public  interface AuthService {
     UserDomain findByNickName(String nickname);
     boolean isValid(String token);
     String generateNewAccessToken(String refreshToken);
+    boolean verifyEmail(String token);
 }

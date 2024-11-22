@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.travel.demo.users.model.mapper.VerificationTokenMapper">
+
+    <insert id="saveToken" parameterType="com.travel.demo.users.entity.VerificationToken">
+        INSERT INTO verification_tokens (token, user_email, expiry_date)
+        VALUES (#{token}, #{userEmail}, #{expiryDate})
+    </insert>
+
+    <select id="findByToken" parameterType="String" resultType="com.travel.demo.users.entity.VerificationToken">
+        SELECT * FROM verification_tokens WHERE token = #{token}
+    </select>
+
+    <delete id="deleteToken" parameterType="String">
+        DELETE FROM verification_tokens WHERE token = #{token}
+    </delete>
+
+</mapper>

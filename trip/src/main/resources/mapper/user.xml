@@ -4,10 +4,10 @@
 <mapper namespace="com.travel.demo.users.model.mapper.AuthMapper">
     <!-- 회원가입 -->
     <insert id="join" parameterType="UserSignUpRequest">
-        insert into users
-            (email, password, name, nickname, phone)
-        values
-            (#{email}, #{password}, #{name}, #{nickName}, #{phone})
+        INSERT INTO users
+            (email, password, name, nickname, phone, is_verified)
+        VALUES
+            (#{email}, #{password}, #{name}, #{nickName}, #{phone}, 0)
     </insert>
 
     <!-- 로그인 -->
@@ -23,4 +23,11 @@
         from users
         where nickname = #{nickName}
     </select>
+    
+    <!-- 이메일 인증 상태 업데이트 -->
+    <update id="updateUserVerificationStatus" parameterType="UserEntity">
+        UPDATE users
+        SET is_verified = #{isVerified}
+        WHERE email = #{email}
+    </update>
 </mapper>

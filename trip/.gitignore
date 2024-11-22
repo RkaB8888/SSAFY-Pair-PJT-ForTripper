@@ -37,3 +37,4 @@ out/
 .vscode/
 
 application-API-KEY.properties
+src/main/resources/application-secret.properties

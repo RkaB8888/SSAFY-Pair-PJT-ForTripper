@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Data
@@ -46,4 +45,5 @@ public class UserEntity {
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
     private int active;     //계정 활성화 여부
+    private int isVerified; // 이메일 인증 여부를 추적하는 새로운 필드
 }

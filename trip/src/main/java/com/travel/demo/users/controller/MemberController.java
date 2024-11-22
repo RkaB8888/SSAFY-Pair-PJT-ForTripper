@@ -55,6 +55,15 @@ public class MemberController {
 
         return ResponseEntity.ok("Valid Token");
     }
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        boolean isVerified = authService.verifyEmail(token);
+        if (isVerified) {
+            return ResponseEntity.ok(Map.of("message", "이메일 인증이 완료되었습니다. 이제 로그인할 수 있습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "유효하지 않거나 만료된 인증 링크입니다."));
+        }
+    }
     
     //post
     @PostMapping("/join")
@@ -68,7 +77,10 @@ public class MemberController {
     public ResponseEntity<?> login(@RequestBody UserLoginRequest loginInfo) {
         System.out.println(loginInfo);
         Map<String, String> tokens = authService.login(loginInfo);
-        if(tokens == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 잘못되었습니다.");
+        if (tokens == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of("message", "아이디 또는 비밀번호가 잘못되었거나 이메일 인증이 필요합니다."));
+        }
         return ResponseEntity.ok(tokens);
     }
     @PostMapping("/refresh")
