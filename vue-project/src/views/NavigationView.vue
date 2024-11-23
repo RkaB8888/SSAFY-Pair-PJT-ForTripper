@@ -9,6 +9,7 @@ const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
 
 // 반응형으로 상태 감시
 const isLogin = computed(() => authStore.isLogin);
+
 // 로그아웃 함수
 const isLogout = () => {
   authStore.userLogout(); // 로그아웃 실행
@@ -28,7 +29,7 @@ const navigateTo = (path) => {
       <!-- Left Side: 로고, 탐색, 목록 -->
       <div class="left-section d-flex align-center">
         <v-btn class="logo-btn" @click="navigateTo('/')">
-          <img src="@/assets/img/temp_logo.png" class="nav-logo" alt="Logo" />
+          <img src="/img/temp_logo.png" class="nav-logo" alt="Logo" />
         </v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/search')">탐색</v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/board')">게시판</v-btn>
@@ -56,12 +57,19 @@ const navigateTo = (path) => {
           <v-btn text class="nav-btn" @click="navigateTo('/photos')">
             사진
           </v-btn>
-          <!-- <v-btn text class="nav-btn" @click="navigateTo('/notifications')">
-            알람
-          </v-btn> -->
+          <!-- 로그아웃 -->
           <v-btn text class="nav-btn" @click="isLogout"> 로그아웃 </v-btn>
-          <v-avatar size="36">
-            <img src="@/assets/img/temp_profile.jpg" alt="Profile" />
+          <!-- 프로필 -->
+          <v-avatar
+            size="36"
+            @click="navigateTo(`/user/${authStore.loginUserInfo.nickname}`)"
+            class="cursor-pointer"
+          >
+            <img
+              src="/img/Default_Profile.png"
+              alt="Profile"
+              class="avatar-image"
+            />
           </v-avatar>
         </template>
       </div>
@@ -95,5 +103,9 @@ const navigateTo = (path) => {
 
 .right-section {
   gap: 8px; /* 버튼 간 간격 */
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

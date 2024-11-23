@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <h1>내 정보 페이지 입니다.</h1>
+    <h1>자유게시글목록</h1>
   </div>
 </template>
 

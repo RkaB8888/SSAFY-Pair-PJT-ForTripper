@@ -21,21 +21,24 @@ export const useAuthStore = defineStore("authStore", () => {
   const isLogin = ref(false); //로그인 했는지 확인
   const isLoginError = ref(false); //로그인 에러가 있는지 확인
   const isValidToken = ref(false); //토큰 유효성 확인
-  const userInfo = ref({}); // 사용자 정보
+  const loginUserInfo = ref({}); // 사용자 정보
+  const userInfo = ref({});
 
   const initializeAuthState = async () => {
     const token = sessionStorage.getItem("accessToken");
     if (token) {
       try {
         await checkToken(); // 토큰 유효성 확인
+        loginUserInfo.value = { ...userInfo.value };
+        userInfo.value = {};
       } catch (error) {
         console.error("토큰 검증 실패:", error);
         isLogin.value = false;
-        userInfo.value = {}; // 초기화
+        loginUserInfo.value = {}; // 초기화
       }
     } else {
       isLogin.value = false;
-      userInfo.value = {}; // 초기화
+      loginUserInfo.value = {}; // 초기화
     }
   };
 
@@ -86,10 +89,10 @@ export const useAuthStore = defineStore("authStore", () => {
   };
 
   const userLogout = async () => {
-    console.log(userInfo);
+    console.log(loginUserInfo);
     isLogin.value = false;
     isLoginError.value = false; // 로그인 에러 상태 초기화
-    userInfo.value = {};
+    loginUserInfo.value = {};
     isValidToken.value = false;
     sessionStorage.clear();
     alert("로그아웃 되었습니다.");
@@ -101,7 +104,7 @@ export const useAuthStore = defineStore("authStore", () => {
     // Refresh Token이 없는 경우
     if (!refreshToken) {
       isLogin.value = false;
-      userInfo.value = {};
+      loginUserInfo.value = {};
       isValidToken.value = false;
       sessionStorage.clear();
       // 알림 및 리다이렉트 제거
@@ -120,7 +123,7 @@ export const useAuthStore = defineStore("authStore", () => {
       async (error) => {
         console.log("auth.js tokenRegeneration", error);
         isLogin.value = false;
-        userInfo.value = {};
+        loginUserInfo.value = {};
         isValidToken.value = false;
         sessionStorage.clear();
         // 알림 및 리다이렉트 제거
@@ -149,10 +152,11 @@ export const useAuthStore = defineStore("authStore", () => {
               isValidToken.value = true;
               isLogin.value = true; // 로그인 상태로 설정
               await getUserInfoById(userId);
-              console.log("getUserInfoById 이후 :", userInfo.value);
+              loginUserInfo.value = { ...userInfo.value };
+              console.log("getUserInfoById 이후 :", loginUserInfo.value);
             } else {
               console.warn("checkByToken 응답 실패");
-              userInfo.value = {};
+              loginUserInfo.value = {};
               isValidToken.value = false;
               isLogin.value = false; // 로그인 상태 해제
               sessionStorage.clear();
@@ -160,6 +164,7 @@ export const useAuthStore = defineStore("authStore", () => {
           },
           (error) => {
             console.error("checkByToken 에러:", error);
+            loginUserInfo.value = {};
             isValidToken.value = false;
             isLogin.value = false; // 로그인 상태 해제
             sessionStorage.clear();
@@ -167,7 +172,7 @@ export const useAuthStore = defineStore("authStore", () => {
         );
       } catch (error) {
         console.error("checkToken 실패:", error);
-        userInfo.value = {};
+        loginUserInfo.value = {};
         isValidToken.value = false;
         isLogin.value = false; // 로그인 상태 해제
         sessionStorage.clear();
@@ -176,7 +181,7 @@ export const useAuthStore = defineStore("authStore", () => {
       console.log("토큰이 존재하지 않음");
       isValidToken.value = false;
       isLogin.value = false; // 로그인 상태 해제
-      userInfo.value = {};
+      loginUserInfo.value = {};
       // API 호출 없이 종료
     }
   };
@@ -249,6 +254,7 @@ export const useAuthStore = defineStore("authStore", () => {
         }
       },
       (error) => {
+        userInfo.value = {};
         console.error("유저 정보 조회 실패:", error);
       }
     );
@@ -258,14 +264,22 @@ export const useAuthStore = defineStore("authStore", () => {
       userNickName,
       (response) => {
         if (response.status === httpStatusCode.OK) {
-          userInfo.value = response.data.userInfo; // 유저 정보 업데이트
+          userInfo.value = {
+            email: response.data.email,
+            name: response.data.name,
+            nickname: response.data.nickname,
+            role: response.data.role,
+          }; // 유저 정보 업데이트
+          console.log("닉네임 찾기로 가져온 유저 정보", response.data.userInfo);
+          console.log("닉네임 찾기로 가져온 유저 정보", userInfo.value);
         } else {
           userInfo.value = {}; // 유저 정보 없음
           console.log("유저 정보 없음");
         }
       },
       (error) => {
-        console.error("유저 정보 조회 실패:", error);
+        userInfo.value = {};
+        console.error("닉네임으로 유저 정보 조회 실패:", error);
       }
     );
   };
@@ -306,6 +320,7 @@ export const useAuthStore = defineStore("authStore", () => {
     getUserInfoByNickName,
     checkIdDuplicate,
     checkNickNameDuplicate,
+    loginUserInfo,
     userInfo,
     isValidToken,
     requestPasswordReset,

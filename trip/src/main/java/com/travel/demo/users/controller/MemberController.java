@@ -42,7 +42,7 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                  .body(Map.of("message", "사용자를 찾을 수 없습니다.", "status", 404));
         }
-        return ResponseEntity.ok(Map.of("message", "중복된 닉네임입니다.", "status", 200));
+        return ResponseEntity.ok(Map.of("email",user.getEmail(),"name",user.getName(),"nickname",user.getNickName(),"role",user.getRole(), "status", 200));
     }
     @GetMapping("/validate")
     public ResponseEntity<?> validateAccessToken(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {

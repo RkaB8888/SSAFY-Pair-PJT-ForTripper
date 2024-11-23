@@ -1,5 +1,5 @@
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
@@ -9,6 +9,7 @@ const { isLogin, isLoginError } = storeToRefs(authStore);
 const { userLogin, checkToken } = authStore;
 // 상태 관리
 const router = useRouter();
+const route = useRoute();
 const emailError = ref("");
 const passwordError = ref("");
 const showPassword = ref(false); // 비밀번호 표시 토글
@@ -71,7 +72,8 @@ const login = async () => {
       const token = sessionStorage.getItem("accessToken");
       await checkToken(token);
       console.log("토큰 검사 끝 메인페이지 이동");
-      router.replace("/");
+      const redirect = route.query.redirect || "/"; // 리다이렉트 경로가 없으면 홈으로
+      router.push(redirect);
     }
   } else {
     console.error("로그인 실패: 입력 값 확인 필요");
