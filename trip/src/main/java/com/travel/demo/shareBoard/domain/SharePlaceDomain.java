@@ -1,9 +1,10 @@
-package com.travel.demo.users.dto;
+package com.travel.demo.shareBoard.domain;
 
 import lombok.Data;
 
 @Data
-public class SharePlace {
+public class SharePlaceDomain {
+    private long user_id;
     private String id;
     private String displayName;
     private Location location;

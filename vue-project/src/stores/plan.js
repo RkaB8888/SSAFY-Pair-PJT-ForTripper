@@ -116,6 +116,7 @@ export const usePlanStore = defineStore("plan", () => {
 
       const response = await shareApi.post("/add", postData, {
         headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
           "Content-Type": "multipart/form-data",
         },
       });

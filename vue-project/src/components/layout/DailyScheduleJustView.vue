@@ -28,7 +28,6 @@
               name: 'PlanDetailEdit',
               params: { plan_id: plan_id },
             }"
-            @click="storeSavePlan(plan)"
           >
             <v-btn>수정</v-btn>
           </router-link>
