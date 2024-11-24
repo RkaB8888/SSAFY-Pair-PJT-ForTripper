@@ -103,8 +103,9 @@ export const usePlanStore = defineStore("plan", () => {
     }
   };
 
-  const addSharePlan = async (formData, dailySchedules, totalDate) => {
+  const addSharePlan = async (formData, dailySchedules, totalDate, plan_id) => {
     try {
+      console.log("플랜 아이디", plan_id);
       const postData = new FormData();
       postData.append("title", formData.get("title"));
       postData.append("content", formData.get("content"));
@@ -114,7 +115,7 @@ export const usePlanStore = defineStore("plan", () => {
       postData.append("dailySchedules", JSON.stringify(dailySchedules));
       postData.append("totalDate", totalDate);
 
-      const response = await shareApi.post("/add", postData, {
+      const response = await shareApi.post(`/add/${plan_id}`, postData, {
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
           "Content-Type": "multipart/form-data",

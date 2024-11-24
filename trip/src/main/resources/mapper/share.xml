@@ -3,4 +3,19 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.travel.demo.shareBoard.model.mapper.ShareBoardMapper">
 
+    <insert id="addSharePost" parameterType="ShareBoardDomain">
+        insert into share_board
+            (user_id, title, content, image_name, plan_id)
+        values
+            (#{user_id}, #{title}, #{content}, #{image_name}, #{plan_id})
+    </insert>
+
+    <insert id="addSharePlan" parameterType="SharePlanDomain">
+        insert into share_plan
+            (plan_id, user_id, total_date)
+        values
+            (#{plan_id}, #{user_id}, #{total_date})
+    </insert>
+
+
 </mapper>

@@ -89,7 +89,8 @@ const submitPost = async () => {
     const response = await planStore.addSharePlan(
       formData,
       dailySchedules.value,
-      selectedPlan.value.total_date
+      selectedPlan.value.total_date,
+      selectedPlan.value.plan_id
     );
 
     if (response && response.data) {

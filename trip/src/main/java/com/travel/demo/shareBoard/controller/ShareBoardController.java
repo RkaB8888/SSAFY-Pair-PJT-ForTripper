@@ -21,11 +21,12 @@ public class ShareBoardController {
     }
 
     //게시글 작성
-    @PostMapping(value = "/add", consumes = "multipart/form-data")
-    public ResponseEntity<?> addSharePlan(@ModelAttribute ShareAddRequestDTO requestDTO, HttpServletRequest request) {
+    @PostMapping(value = "/add/{plan_id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> addSharePlan(@PathVariable long plan_id, @ModelAttribute ShareAddRequestDTO requestDTO, HttpServletRequest request) {
         try {
             System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
             String token = request.getHeader("Authorization");
+            System.out.println("공유되는 plan_id: " + plan_id);
 //            System.out.println("토큰값: " + token);
 //            System.out.println("Title: " + requestDTO.getTitle());
 //            System.out.println("Content: " + requestDTO.getContent());
@@ -45,7 +46,7 @@ public class ShareBoardController {
 //                System.out.println(dailySchedules.get(s));
 //            }
 
-            shareBoardService.addSharePost(token, requestDTO);
+            shareBoardService.addSharePost(plan_id, token, requestDTO);
 
             return ResponseEntity.ok("Plan added successfully");
         } catch (Exception e) {

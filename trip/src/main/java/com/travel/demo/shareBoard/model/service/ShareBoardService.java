@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 public interface ShareBoardService {
-    int addSharePost(String token, ShareAddRequestDTO requestDTO) throws IOException;
+    int addSharePost(long plan_id, String token, ShareAddRequestDTO requestDTO) throws IOException, ParseException;
 }
