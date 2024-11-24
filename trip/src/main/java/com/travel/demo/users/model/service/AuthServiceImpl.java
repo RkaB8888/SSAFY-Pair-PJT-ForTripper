@@ -1,5 +1,7 @@
 package com.travel.demo.users.model.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.travel.demo.users.domain.UserDomain;
 import com.travel.demo.users.dto.UserLoginRequest;
@@ -37,6 +40,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Value("${app.frontend-url}")
 	private String frontendUrl;
+	
+	@Value("${file.upload-dir}")
+    private String uploadDir; // 유저 프로필파일 업로드 경로 설정 (application.properties)
 
 	@Override
 	public String join(UserSignUpRequest joinInfo) {
@@ -137,6 +143,8 @@ public class AuthServiceImpl implements AuthService {
 		userDomain.setName(userEntity.getName());
 		userDomain.setNickName(userEntity.getNickName());
 		userDomain.setRole(userEntity.getRole());
+		userDomain.setProfileImage(userEntity.getProfileImage());
+		userDomain.setJoinDate(userEntity.getCreateDate());
 		System.out.println("AuthService의 findByEmail 리턴 : " + userDomain);
 		return userDomain;
 	}
@@ -152,15 +160,33 @@ public class AuthServiceImpl implements AuthService {
 		userDomain.setName(userEntity.getName());
 		userDomain.setNickName(userEntity.getNickName());
 		userDomain.setRole(userEntity.getRole());
+		userDomain.setProfileImage(userEntity.getProfileImage());
+		userDomain.setJoinDate(userEntity.getCreateDate());
 		System.out.println("AuthService의 findByEmail 리턴 : " + userDomain);
 		return userDomain;
 	}
-
+	@Override
+	public String getToken(String authorizationHeader) {
+		return authorizationHeader.substring(7);
+	}
 	@Override
 	public boolean isValid(String token) {
 		return jwtUtil.isValid(token);
 	}
+	@Override
+	public String extractEmailFromToken(String authorizationHeader) {
+	    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+	        return null;
+	    }
 
+	    String token = getToken(authorizationHeader); // "Bearer " 제거
+
+	    if (!isValid(token)) {
+	        return null;
+	    }
+
+	    return jwtUtil.getIdFromToken(token);
+	}
 	@Override
 	public String generateNewAccessToken(String refreshToken) {
 		// 리프레시 토큰에서 아이디 추출
@@ -251,4 +277,79 @@ public class AuthServiceImpl implements AuthService {
 
 		return true;
 	}
+
+	@Override
+	public String updateProfileImage(String email, MultipartFile profileImage) {
+	    try {
+	        // 파일명 생성
+	    	String fileName = System.currentTimeMillis() + "_" + UUID.randomUUID().toString() + "_" + profileImage.getOriginalFilename();
+	        // 저장할 경로
+	        String filePath = uploadDir + File.separator + "profile_images" + File.separator + fileName;
+
+	        // 디렉토리 생성
+	        File dir = new File(uploadDir + File.separator + "profile_images");
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        // 파일 저장
+	        File dest = new File(filePath);
+	        profileImage.transferTo(dest);
+
+	        // DB에 저장할 경로 설정
+	        String dbFilePath = "/upload/profile_images/" + fileName;
+
+	        // 사용자 정보 업데이트
+	        authMapper.updateProfileImage(email, dbFilePath);
+
+	        return dbFilePath;
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+
+	@Override
+    public boolean updateNickname(String email, String newNickname) {
+        // 닉네임 중복 체크
+        UserEntity existingUser = authMapper.findByNickName(newNickname);
+        if (existingUser != null) {
+            // 닉네임이 이미 존재함
+            return false;
+        }
+
+        // 닉네임 업데이트
+        authMapper.updateNickname(email, newNickname);
+        return true;
+    }
+
+	@Override
+    public boolean updatePassword(String email, String currentPassword, String newPassword) {
+        UserEntity userEntity = authMapper.findByEmail(email);
+        if (userEntity == null) {
+            return false;
+        }
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, userEntity.getPassword())) {
+            return false; // 현재 비밀번호 불일치
+        }
+
+        // 새로운 비밀번호 암호화
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+
+        // 비밀번호 업데이트
+        userEntity.setPassword(encodedNewPassword);
+        authMapper.updatePassword(userEntity);
+
+        return true;
+    }
+
+	@Override
+    public boolean deleteAccount(String email) {
+        // 관련 데이터 삭제 또는 비활성화 로직 추가 필요
+        authMapper.deleteUser(email);
+        return true;
+    }
 }

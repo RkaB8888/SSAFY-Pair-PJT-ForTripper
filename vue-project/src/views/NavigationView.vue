@@ -2,10 +2,22 @@
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { computed } from "vue";
+import { storeToRefs } from "pinia";
+
+const { VITE_TRIP_API_URL } = import.meta.env;
 
 // Vue Router 사용
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
+const { loginUserInfo } = storeToRefs(authStore);
+// 프로필 이미지 URL 설정
+const profileImageUrl = computed(() => {
+  const imageUrl = loginUserInfo.value.profileImage
+    ? `${VITE_TRIP_API_URL}${loginUserInfo.value.profileImage}`
+    : authStore.defaultProfileImage;
+  // console.log(imageUrl);
+  return imageUrl;
+});
 
 // 반응형으로 상태 감시
 const isLogin = computed(() => authStore.isLogin);
@@ -19,6 +31,9 @@ const isLogout = () => {
 // 라우팅 함수
 const navigateTo = (path) => {
   router.push(path);
+};
+const onImageError = (event) => {
+  event.target.src = authStore.defaultProfileImage;
 };
 </script>
 
@@ -66,9 +81,10 @@ const navigateTo = (path) => {
             class="cursor-pointer"
           >
             <img
-              src="/img/Default_Profile.png"
+              :src="profileImageUrl"
               alt="Profile"
               class="avatar-image"
+              @error="onImageError"
             />
           </v-avatar>
         </template>

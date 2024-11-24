@@ -69,6 +69,7 @@ CREATE TABLE `users` (
   `modifyDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `is_verified` TINYINT(1) NOT NULL DEFAULT '0',
+  `profile_image` VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `nickname` (`nickname`),
   UNIQUE KEY `email` (`email`)
@@ -81,7 +82,11 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'$2a$10$cFFs1kgIPYkB14IbpuEyqefdqhkHvNPa9qpHqKalUDI8bqWmZfeVy','홍길동','경로당소드마스터','01012345678','0',3,'NORMAL','2024-11-15 08:39:03','2024-11-15 08:39:03',1,0),(2,'$2a$10$z..j4zAHM.X5ozOK4i02vusgHYgjbBZup3.Jk4YhRXrv1iYxucEtG','이은선','모르는개산책','01012345678','98silverline@gmail.com',3,'NORMAL','2024-11-15 08:41:24','2024-11-15 08:41:24',1,0),(3,'$2a$10$qi1cuxavbLPzo7XthD/NgON/Pt55wVjCPN5VmcPySvkwuDqz3a6ti','김철수','손흥민의야구교실','01012345678','abc@gmail.com',3,'NORMAL','2024-11-15 08:43:21','2024-11-15 08:43:21',1,0),(5,'$2a$10$e7594FBPaySt4RvzZQ/u3OBK6rQsaEznddq8gUYEXObsNQNs6BTlO','김유저','집가고싶다','01098746212','user123@gmail.com',3,'NORMAL','2024-11-18 02:53:46','2024-11-18 02:53:46',1,0);
+INSERT INTO `users` 
+VALUES (1,'$2a$10$cFFs1kgIPYkB14IbpuEyqefdqhkHvNPa9qpHqKalUDI8bqWmZfeVy','홍길동','경로당소드마스터','01012345678','0',3,'NORMAL','2024-11-15 08:39:03','2024-11-15 08:39:03',1,0,null),
+(2,'$2a$10$z..j4zAHM.X5ozOK4i02vusgHYgjbBZup3.Jk4YhRXrv1iYxucEtG','이은선','모르는개산책','01012345678','98silverline@gmail.com',3,'NORMAL','2024-11-15 08:41:24','2024-11-15 08:41:24',1,0,null),
+(3,'$2a$10$qi1cuxavbLPzo7XthD/NgON/Pt55wVjCPN5VmcPySvkwuDqz3a6ti','김철수','손흥민의야구교실','01012345678','abc@gmail.com',3,'NORMAL','2024-11-15 08:43:21','2024-11-15 08:43:21',1,0,null),
+(5,'$2a$10$e7594FBPaySt4RvzZQ/u3OBK6rQsaEznddq8gUYEXObsNQNs6BTlO','김유저','집가고싶다','01098746212','user123@gmail.com',3,'NORMAL','2024-11-18 02:53:46','2024-11-18 02:53:46',1,0,null);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

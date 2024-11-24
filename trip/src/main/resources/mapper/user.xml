@@ -31,8 +31,27 @@
         WHERE email = #{email}
     </update>
     
-    <update id="updatePassword" parameterType="com.travel.demo.users.entity.UserEntity">
+    <update id="updatePassword" parameterType="UserEntity">
     	UPDATE users SET password = #{password} WHERE email = #{email}
 	</update>
+	
+	<!-- 프로필 이미지 업데이트 -->
+    <update id="updateProfileImage">
+        UPDATE users
+        SET profile_image = #{profileImage}
+        WHERE email = #{email}
+    </update>
+
+    <!-- 닉네임 업데이트 -->
+    <update id="updateNickname">
+        UPDATE users
+        SET nickname = #{nickname}
+        WHERE email = #{email}
+    </update>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser">
+        DELETE FROM users WHERE email = #{email}
+    </delete>
 	
 </mapper>

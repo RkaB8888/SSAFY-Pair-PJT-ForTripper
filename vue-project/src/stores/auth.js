@@ -12,6 +12,11 @@ import {
   checkByToken,
   resetPasswordRequest,
   resetPassword,
+  updateProfileImageAPI,
+  updateNicknameAPI,
+  updatePasswordAPI,
+  deleteAccountAPI,
+  // getProfileIMG,
 } from "@/api/authApi";
 import { httpStatusCode } from "@/util/http-status";
 import { resetTokenRefreshFailed } from "@/util/http-commons";
@@ -24,6 +29,7 @@ export const useAuthStore = defineStore("authStore", () => {
   const loginUserInfo = ref({}); // 사용자 정보
   const userInfo = ref({});
 
+  const defaultProfileImage = "/img/Default_Profile.png";
   const initializeAuthState = async () => {
     const token = sessionStorage.getItem("accessToken");
     if (token) {
@@ -246,6 +252,11 @@ export const useAuthStore = defineStore("authStore", () => {
             name: response.data.name,
             nickname: response.data.nickname,
             role: response.data.role,
+            joinDate: response.data.joinDate,
+            profileImage:
+              response.data.profileImage === "null"
+                ? null
+                : response.data.profileImage,
           };
           console.log("유저 정보 저장 :", userInfo.value);
         } else {
@@ -269,6 +280,11 @@ export const useAuthStore = defineStore("authStore", () => {
             name: response.data.name,
             nickname: response.data.nickname,
             role: response.data.role,
+            joinDate: response.data.joinDate,
+            profileImage:
+              response.data.profileImage === "null"
+                ? null
+                : response.data.profileImage,
           }; // 유저 정보 업데이트
           console.log("닉네임 찾기로 가져온 유저 정보", response.data.userInfo);
           console.log("닉네임 찾기로 가져온 유저 정보", userInfo.value);
@@ -307,6 +323,75 @@ export const useAuthStore = defineStore("authStore", () => {
       }
     );
   };
+  const updateProfileImage = async (profileImageFile) => {
+    const formData = new FormData();
+    formData.append("profileImage", profileImageFile);
+
+    await updateProfileImageAPI(
+      formData,
+      (response) => {
+        console.log("프로필 사진 변경 성공:", response);
+        loginUserInfo.value.profileImage = response.data.profileImageUrl;
+      },
+      (error) => {
+        console.error("프로필 사진 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const updateNickname = async (newNickname) => {
+    await updateNicknameAPI(
+      { nickname: newNickname },
+      (response) => {
+        console.log("닉네임 변경 성공:", response.data);
+        userInfo.value.nickname = newNickname;
+      },
+      (error) => {
+        console.error("닉네임 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const updatePassword = async (currentPassword, newPassword) => {
+    await updatePasswordAPI(
+      { currentPassword, newPassword },
+      (response) => {
+        console.log("비밀번호 변경 성공:", response.data);
+      },
+      (error) => {
+        console.error("비밀번호 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const deleteAccount = async () => {
+    await deleteAccountAPI(
+      (response) => {
+        console.log("회원 탈퇴 성공:", response.data);
+        userLogout();
+      },
+      (error) => {
+        console.error("회원 탈퇴 실패:", error);
+        throw error;
+      }
+    );
+  };
+  // const getProfileImage = async (filename) => {
+  //   await getProfileIMG(
+  //     filename,
+  //     (response) => {
+  //       const blob = response.data; // 서버에서 반환된 Blob 데이터
+  //       const imageUrl = URL.createObjectURL(blob); // Blob 데이터를 렌더링 가능한 URL로 변환
+  //       userInfo.value.profileImage = imageUrl; // 이미지 URL을 저장
+  //       console.log("프로필 이미지 로드 성공:", imageUrl);
+  //     },
+  //     (error) => {
+  //       console.error("프로필 이미지 로드 실패:", error);
+  //       userInfo.value.profileImage = defaultProfileImage; // 실패 시 기본 이미지 사용
+  //     }
+  //   );
+  // };
+
   return {
     initializeAuthState,
     isLogin,
@@ -325,5 +410,11 @@ export const useAuthStore = defineStore("authStore", () => {
     isValidToken,
     requestPasswordReset,
     handleResetPassword,
+    updateProfileImage,
+    updateNickname,
+    updatePassword,
+    deleteAccount,
+    defaultProfileImage,
+    // getProfileImage,
   };
 });

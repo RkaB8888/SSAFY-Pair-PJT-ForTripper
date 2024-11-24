@@ -59,6 +59,12 @@ const router = createRouter({
       beforeEnter: onlyAuthUser,
     },
     {
+      path: "/user/edit",
+      name: "EditProfile",
+      component: () => import("@/views/UserViews/EditProfileView.vue"),
+      beforeEnter: onlyAuthUser,
+    },
+    {
       path: "/auth",
       name: "auth",
       component: AuthView,

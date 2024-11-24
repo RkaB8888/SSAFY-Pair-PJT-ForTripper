@@ -1,5 +1,7 @@
 package com.travel.demo.users.domain;
 
+import java.time.LocalDateTime;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,4 +24,6 @@ public class UserDomain {
 
     private String role;
     private String name;
+    private String profileImage; // 프로필 이미지 경로 추가
+    private LocalDateTime joinDate; // 가입일자 추가
 }

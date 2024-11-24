@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+
+const { VITE_TRIP_API_URL } = import.meta.env;
 
 const props = defineProps({
   user: {
@@ -14,13 +17,25 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
 
-const defaultProfileImage = "/img/Default_Profile.png";
+const onImageError = (event) => {
+  // console.log("이미지 에러 발생");
+  event.target.src = authStore.defaultProfileImage;
+};
+// 가입일자 포맷팅
+const formattedJoinDate = computed(() => {
+  return new Date(props.user.joinDate).toLocaleDateString();
+});
 
-// 가입일자 포맷팅 (주석 처리)
-// const formattedJoinDate = computed(() => {
-//   return new Date(user.joinDate).toLocaleDateString();
-// });
+// 프로필 이미지 URL 설정
+const profileImageUrl = computed(() => {
+  const imageUrl = props.user.profileImage
+    ? `${VITE_TRIP_API_URL}${props.user.profileImage}`
+    : authStore.defaultProfileImage;
+  // console.log(imageUrl);
+  return imageUrl;
+});
 
 // 친구 여부 (임시로 false로 설정)
 const isFriend = ref(false);
@@ -50,9 +65,10 @@ const reportUser = () => {
       <!-- 프로필 사진 -->
       <v-avatar size="128">
         <img
-          :src="user.profileImage || defaultProfileImage"
+          :src="profileImageUrl"
           alt="Profile Image"
           class="avatar-image"
+          @error="onImageError"
         />
       </v-avatar>
     </v-col>
@@ -60,7 +76,7 @@ const reportUser = () => {
       <!-- 닉네임 -->
       <h2>{{ user.nickname || "존재하지 않는 유저" }}</h2>
       <!-- 가입일자 (주석 처리) -->
-      <!-- <p>가입일: {{ formattedJoinDate }}</p> -->
+      <p>가입일: {{ formattedJoinDate }}</p>
       <!-- 자신의 정보인 경우 -->
       <div v-if="isOwnProfile">
         <v-btn color="primary" @click="editProfile">정보 수정</v-btn>
