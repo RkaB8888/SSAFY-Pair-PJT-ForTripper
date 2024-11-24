@@ -1,11 +1,12 @@
 <script setup>
 // npm install vue-draggable-plus
-import { ref, onMounted, computed, defineProps } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { usePlanStore } from "@/stores/plan";
 import { vDraggable } from "vue-draggable-plus";
-import DailyScheduleJustView from "@/components/layout/DailyScheduleJustView.vue";
-import GoogleMapJustView from "@/components/layout/GoogleMapJustView.vue";
+import PlanInfo from "@/components/layout/PlanInfo.vue";
+import DailySchedule from "@/components/layout/DailySchedule.vue";
+import GoogleMap from "@/components/layout/GoogleMap.vue";
 
 const props = defineProps({
   plan_id: {
@@ -27,18 +28,17 @@ function onStart() {
   console.log("start");
 }
 
-function onUpdate() {
-  console.log("update");
-}
-
-//로컬스토리지에 Plan 저장
-const storeSavePlan = async (plan) => {
-  try {
-    await planStore.savePlanToLocalStorage(plan);
-  } catch (error) {
-    console.error("에러: ", error);
+function onUpdate(evt) {
+  console.log("update", evt);
+  const { oldIndex, newIndex } = evt;
+  const date = evt.target.getAttribute("data-date");
+  if (date && dailySchedules.value[date]) {
+    const updatedPlaces = [...dailySchedules.value[date]];
+    const [movedItem] = updatedPlaces.splice(oldIndex, 1);
+    updatedPlaces.splice(newIndex, 0, movedItem);
+    updateSchedule(date, updatedPlaces); // updateSchedule 호출
   }
-};
+}
 
 // 날짜 리스트 생성 함수
 const generateDateList = (start, end) => {
@@ -105,6 +105,14 @@ const dateWithSchedules = computed(() => {
   }));
 });
 
+const updateSchedule = (date, updatedPlaces) => {
+  if (dailySchedules.value[date]) {
+    dailySchedules.value[date] = [...updatedPlaces];
+    // 강제로 reactive 상태를 재할당
+    dailySchedules.value = { ...dailySchedules.value };
+  }
+};
+
 //페이지 로딩되면 자동 실행
 onMounted(() => {
   const storePlan = localStorage.getItem("currentPlan");
@@ -129,64 +137,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <h1>Detail 페이지</h1>
-  <div>
-    <h2>{{ plan.plan_title }}</h2>
-    <p>시작일: {{ plan.start_date }}</p>
-    <p>종료일: {{ plan.end_date }}</p>
-    <p>{{ plan.total_date - 1 }}박 {{ plan.total_date }}일 여행</p>
-    <p>{{ plan.description }}</p>
-  </div> -->
-
-  <!-- 날짜 및 장소 표시 -->
-  <div>
+  <v-container fluid class="pa-0">
+    <v-row justify="center">
+      <v-col cols="12">
+        <h1 class="text-h3 text-center mb-6">Detail 페이지</h1>
+      </v-col>
+    </v-row>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <PlanInfo :plan="plan" />
+      </v-col>
+    </v-row>
     <v-row no-gutters>
       <v-col cols="12" md="3">
-        <DailyScheduleJustView
+        <DailySchedule
           :dateWithSchedules="dateWithSchedules"
           :selectedDate="selectedDate"
-          :plan_id="plan.plan_id"
           @save="handleSave"
           @select-date="selectDate"
           @remove-place="removePlaceFromDate"
-        />
-      </v-col>
-      <v-col cols="12" md="9">
-        <GoogleMapJustView
-          :placesForSelectedDate="dailySchedules[selectedDate]"
-          @select-place="savePlaceToDate"
+          @drag-start="onStart"
+          @drag-end="onUpdate"
+          @update-schedule="updateSchedule"
           class="fill-height"
         />
       </v-col>
+      <v-col cols="12" md="9">
+        <GoogleMap @select-place="savePlaceToDate" class="fill-height" />
+      </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
-.datePlan {
-  background-color: aliceblue;
-  margin-top: 10px;
-  cursor: pointer;
-  padding: 10px;
-}
-
-.datePlan.selected {
-  background-color: lightblue;
-  font-weight: bold;
-}
-
-.datePlan ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.datePlan p {
-  font-style: italic;
-  color: gray;
-}
-
-.ghost {
-  opacity: 0.5;
-  background: #c8ebfb;
+.fill-height {
+  height: calc(100vh - 200px); /* 예시 높이, 필요에 따라 조정 */
 }
 </style>

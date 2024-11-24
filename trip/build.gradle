@@ -61,7 +61,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.aspectj:aspectjweaver:1.9.19' // 최신 버전 확인 후 추가
-	
+
+	compileOnly 'org.apache.tomcat:tomcat-servlet-api:9.0.37'
 }
 
 //dependencyManagement {

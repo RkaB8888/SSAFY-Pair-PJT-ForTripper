@@ -4,8 +4,7 @@ import { ref, onMounted, computed, defineProps } from "vue";
 import { useRoute } from "vue-router";
 import { usePlanStore } from "@/stores/plan";
 import { vDraggable } from "vue-draggable-plus";
-import DailyScheduleJustView from "@/components/layout/DailyScheduleJustView.vue";
-import GoogleMapJustView from "@/components/layout/GoogleMapJustView.vue";
+import GoogleMap from "@/components/layout/GoogleMap.vue";
 
 const props = defineProps({
   plan_id: {
@@ -129,36 +128,72 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <h1>Detail 페이지</h1>
+  <h1>Detail 페이지</h1>
   <div>
     <h2>{{ plan.plan_title }}</h2>
     <p>시작일: {{ plan.start_date }}</p>
     <p>종료일: {{ plan.end_date }}</p>
     <p>{{ plan.total_date - 1 }}박 {{ plan.total_date }}일 여행</p>
     <p>{{ plan.description }}</p>
-  </div> -->
+  </div>
 
   <!-- 날짜 및 장소 표시 -->
   <div>
-    <v-row no-gutters>
-      <v-col cols="12" md="3">
-        <DailyScheduleJustView
-          :dateWithSchedules="dateWithSchedules"
-          :selectedDate="selectedDate"
-          :plan_id="plan.plan_id"
-          @save="handleSave"
-          @select-date="selectDate"
-          @remove-place="removePlaceFromDate"
-        />
-      </v-col>
-      <v-col cols="12" md="9">
-        <GoogleMapJustView
-          :placesForSelectedDate="dailySchedules[selectedDate]"
-          @select-place="savePlaceToDate"
-          class="fill-height"
-        />
-      </v-col>
-    </v-row>
+    <h3>날짜별 일정</h3>
+    <router-link
+      :to="{
+        name: 'PlanDetailEdit',
+        params: { plan_id: plan.plan_id },
+      }"
+      @click="storeSavePlan(plan)"
+      ><button>수정</button></router-link
+    >
+
+    <ul>
+      <li
+        v-for="(schedule, index) in dateWithSchedules"
+        :key="index"
+        class="datePlan"
+        :class="{ selected: selectedDate === schedule.date }"
+        @click="selectDate(schedule.date)"
+      >
+        <strong>{{ schedule.date }}</strong>
+        <ul v-if="schedule.places.length > 0">
+          <div class="flex">
+            <ul
+              v-draggable="[
+                schedule.places,
+                {
+                  animation: 150,
+                  ghostClass: 'ghost',
+                  onUpdate,
+                  onStart,
+                },
+              ]"
+              class="target-directive flex flex-col gap-2 p-4 w-full h-auto bg-gray-500/5 rounded"
+            >
+              <li
+                v-for="(place, index) in schedule.places"
+                :key="place.id"
+                class="h-30 bg-gray-500/5 rounded p-3 cursor-move"
+              >
+                {{ place.displayName }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- <li v-for="(place, index) in schedule.places" :key="index">
+            {{ place.displayName }}
+            <br />
+            {{ place.formattedAddress }}
+            <button @click.stop="removePlaceFromDate(schedule.date, place)">
+              삭제
+            </button>
+          </li> -->
+        </ul>
+        <p v-else>장소가 없습니다.</p>
+      </li>
+    </ul>
   </div>
 </template>
 

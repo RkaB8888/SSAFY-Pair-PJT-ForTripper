@@ -1,12 +1,10 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import planApi from "@/api/planApi";
-import { jwtDecode } from "jwt-decode";
-import { useAuthStore } from "@/stores/auth";
+import shareApi from "@/api/shareApi";
+import axios from "axios";
 
 export const usePlanStore = defineStore("plan", () => {
-  const authStore = useAuthStore();
-
   //여행 계획 목록
   const plans = ref([]); //GET 요청을 통해 Plan List 데이터 저장
   //특정 여행 계획
@@ -32,6 +30,7 @@ export const usePlanStore = defineStore("plan", () => {
   //로컬 스토리지에 Plan 저장
   const savePlanToLocalStorage = async (plan) => {
     try {
+      console.log("스토리지에 Plan 저장!");
       const data = {
         plan,
         timestamp: Date.now(),
@@ -47,8 +46,7 @@ export const usePlanStore = defineStore("plan", () => {
   const fetchPlans = async () => {
     try {
       console.log("데이터 불러오기익");
-      const authStore = useAuthStore();
-      console.log('토큰', sessionStorage.getItem("accessToken"));
+      console.log("토큰", sessionStorage.getItem("accessToken"));
       const response = await planApi.get("/", {
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
@@ -105,12 +103,38 @@ export const usePlanStore = defineStore("plan", () => {
     }
   };
 
+  const addSharePlan = async (formData, dailySchedules, totalDate) => {
+    try {
+      const postData = new FormData();
+      postData.append("title", formData.get("title"));
+      postData.append("content", formData.get("content"));
+      if (formData.get("image")) {
+        postData.append("image", formData.get("image"));
+      }
+      postData.append("dailySchedules", JSON.stringify(dailySchedules));
+      postData.append("totalDate", totalDate);
+
+      const response = await shareApi.post("/add", postData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("서버 응답:", response.data);
+      return response;
+    } catch (error) {
+      console.error("서버 저장 실패:", error.response || error);
+      throw error;
+    }
+  };
+
   return {
     addPlan,
     fetchPlans,
     savePlanToLocalStorage,
     fetchVisitPlaceByDate,
     saveDailySchedules,
+    addSharePlan,
     plans,
     plan,
   };

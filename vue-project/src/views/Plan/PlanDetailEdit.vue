@@ -1,11 +1,13 @@
 <script setup>
 // npm install vue-draggable-plus
 import { ref, onMounted, computed, defineProps } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute } from "vue-router"; // useRoute는 이제 사용하지 않음
 import { usePlanStore } from "@/stores/plan";
-import { vDraggable } from 'vue-draggable-plus'
+import { vDraggable } from "vue-draggable-plus";
+import DailySchedule from "@/components/layout/DailySchedule.vue";
 import GoogleMap from "@/components/layout/GoogleMap.vue";
 
+// props에서 plan_id를 받아옵니다
 const props = defineProps({
   plan_id: {
     type: String,
@@ -14,21 +16,23 @@ const props = defineProps({
 });
 
 const planStore = usePlanStore();
-const route = useRoute();
-const plan_id = route.params.plan_id;
 
 const plan = ref({});
 const dateList = ref([]); // 모든 날짜 리스트
 const dailySchedules = ref({}); // 날짜별 일정 데이터
-const selectedDate = ref(null); // 선택된 날짜
+const selectedDate = ref(null);
 
-function onStart() {
-  console.log('start')
-}
+// plan_id는 props로 받아오기 때문에 useRoute()로 가져올 필요 없습니다.
+// const plan_id = route.params.plan_id; <- 이 줄을 삭제하세요
 
-function onUpdate() {
-  console.log('update')
-}
+//로컬스토리지에 Plan 저장
+const storeSavePlan = async (plan) => {
+  try {
+    await planStore.savePlanToLocalStorage(plan);
+  } catch (error) {
+    console.error("에러: ", error);
+  }
+};
 
 // 날짜 리스트 생성 함수
 const generateDateList = (start, end) => {
@@ -76,7 +80,7 @@ const savePlaceToDate = (place) => {
 
 //장소 서버에 저장
 const handleSave = () => {
-  planStore.saveDailySchedules(dailySchedules, plan_id);
+  planStore.saveDailySchedules(dailySchedules, props.plan_id); // 여기서 props.plan_id를 사용
 };
 
 // 장소 삭제 함수
@@ -100,7 +104,8 @@ onMounted(() => {
   const storePlan = localStorage.getItem("currentPlan");
   if (storePlan) {
     const parsedPlan = JSON.parse(storePlan);
-    if (String(parsedPlan.plan.plan_id) === String(plan_id)) {
+    if (String(parsedPlan.plan.plan_id) === String(props.plan_id)) {
+      // props.plan_id로 변경
       plan.value = parsedPlan.plan;
       // 날짜 리스트 생성
       dateList.value = generateDateList(
@@ -108,7 +113,7 @@ onMounted(() => {
         plan.value.end_date
       );
       // 서버에서 날짜별 일정 가져오기
-      fetchSchedulesByDate(plan_id);
+      fetchSchedulesByDate(props.plan_id); // props.plan_id로 변경
     } else {
       console.warn("로컬 스토리지의 plan 데이터와 URL의 plan_id 불일치");
     }
@@ -119,71 +124,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>Detail 페이지</h1>
-  <div>
-    <h2>{{ plan.plan_title }}</h2>
-    <p>시작일: {{ plan.start_date }}</p>
-    <p>종료일: {{ plan.end_date }}</p>
-    <p>{{ plan.total_date - 1 }}박 {{ plan.total_date }}일 여행</p>
-    <p>{{ plan.description }}</p>
-  </div>
-
   <!-- 날짜 및 장소 표시 -->
   <div>
-    <h3>날짜별 일정</h3>
-    <button @click="handleSave">저장</button>
-    <ul>
-      <li
-        v-for="(schedule, index) in dateWithSchedules"
-        :key="index"
-        class="datePlan"
-        :class="{ selected: selectedDate === schedule.date }"
-        @click="selectDate(schedule.date)"
-      >
-        <strong>{{ schedule.date }}</strong>
-        <ul v-if="schedule.places.length > 0">
-          <div class="flex">
-              <ul
-                v-draggable="[
-                  schedule.places,
-                  {
-                    animation: 150,
-                    ghostClass: 'ghost',
-                    onUpdate,
-                    onStart
-                  }
-                ]"
-                class="target-directive flex flex-col gap-2 p-4 w-full h-auto bg-gray-500/5 rounded"
-              >
-                <li
-                  v-for="(place, index) in schedule.places"
-                  :key="place.id"
-                  class="h-30 bg-gray-500/5 rounded p-3 cursor-move"
-                >
-                  {{ place.displayName }}
-                  <button @click.stop="removePlaceFromDate(schedule.date, place)">
-                    삭제
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-          <!-- <li v-for="(place, index) in schedule.places" :key="index">
-            {{ place.displayName }}
-            <br />
-            {{ place.formattedAddress }}
-            <button @click.stop="removePlaceFromDate(schedule.date, place)">
-              삭제
-            </button>
-          </li> -->
-        </ul>
-        <p v-else>장소가 없습니다.</p>
-      </li>
-    </ul>
+    <v-row no-gutters>
+      <v-col cols="12" md="3">
+        <DailySchedule
+          :dateWithSchedules="dateWithSchedules"
+          :selectedDate="selectedDate"
+          :plan_id="plan.plan_id"
+          @save="handleSave"
+          @select-date="selectDate"
+          @remove-place="removePlaceFromDate"
+        />
+      </v-col>
+      <v-col cols="12" md="9">
+        <GoogleMap
+          :placesForSelectedDate="dailySchedules[selectedDate]"
+          @select-place="savePlaceToDate"
+          class="fill-height"
+        />
+      </v-col>
+    </v-row>
   </div>
-
-  <!-- Google Map 컴포넌트 -->
-  <GoogleMap @select-place="savePlaceToDate"></GoogleMap>
 </template>
 
 <style scoped>
