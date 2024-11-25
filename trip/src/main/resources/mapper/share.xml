@@ -24,10 +24,36 @@
             (#{plan_id}, #{id}, #{displayName}, #{lat}, #{lng}, #{formattedAddress}, #{internationalPhoneNumber}, #{date}, #{order})
     </insert>
 
-    <select id="findShareBoardAll">
+    <select id="findShareBoardAll" resultType="ShareBoardEntity">
         select post_id, user_id, plan_id, title, content, created_time, modified_time, image_name
         from share_board
         order by post_id
     </select>
 
+    <select id="findSharePlacesByPlanId" parameterType="long" resultType="SharePlaceEntity">
+        select visit_google_id, display_name, latitude, longitude, address, phone_number, visit_date, visit_order
+        from share_place
+        where plan_id = #{plan_id}
+        order by visit_order
+    </select>
+
+    <select id="findPlanByPlanId" parameterType="long" resultType="SharePlanEntity">
+        select plan_id, user_id, create_date, total_date
+        from share_plan
+        where plan_id = #{plan_id}
+    </select>
+
+    <select id="findFirstDateByPlanId" parameterType="long" resultType="java.time.LocalDate">
+        SELECT MIN(visit_date) AS first_visited_date
+        FROM share_place
+        WHERE plan_id = #{plan_id};
+    </select>
+
+    <select id="findPlanIdRecentByUserId" parameterType="long" resultType="long">
+        SELECT plan_id
+        FROM plans
+        WHERE user_id = #{user_id}
+        ORDER BY create_date DESC
+            LIMIT 1;
+    </select>
 </mapper>

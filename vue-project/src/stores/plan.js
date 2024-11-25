@@ -134,16 +134,46 @@ export const usePlanStore = defineStore("plan", () => {
 
   const fetchShareBoard = async () => {
     try {
-      console.log('ShareBoard 데이터 로드 시작');
+      console.log("ShareBoard 데이터 로드 시작");
       const response = await shareApi.get("/");
       sharePosts.value = response.data;
       console.log(sharePosts.value);
     } catch (error) {
-      console.log('ShareBoard 데이터 로드 실패', error);
+      console.log("ShareBoard 데이터 로드 실패", error);
     }
   };
 
+  //서버에서 날짜별 방문 장소 가져오기
+  const fetchShareVisitPlaceByDate = async (plan_id) => {
+    try {
+      const response = await shareApi.get(`/${plan_id}`, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("날짜별 일정 불러오기 실패: ", error);
+      throw error;
+    }
+  };
 
+  const saveSharePlan = async (plan_id, planInfo) => {
+    try {
+      console.log("plan_id는 ", plan_id);
+      console.log("planInfo는 ", planInfo);
+      const response = await shareApi.post(`/share/${plan_id}`, planInfo, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+        },
+      });
+      console.log("서버 응답", response.data);
+      return response;
+    } catch (error) {
+      console.error("share plan 저장 실패: ", error);
+      throw error;
+    }
+  };
 
   return {
     addPlan,
@@ -153,6 +183,8 @@ export const usePlanStore = defineStore("plan", () => {
     saveDailySchedules,
     addSharePlan,
     fetchShareBoard,
+    fetchShareVisitPlaceByDate,
+    saveSharePlan,
     plans,
     plan,
     sharePosts,

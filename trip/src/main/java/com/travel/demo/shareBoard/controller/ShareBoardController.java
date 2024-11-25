@@ -1,7 +1,10 @@
 package com.travel.demo.shareBoard.controller;
 
+import com.travel.demo.plan.dto.PlaceListDTO;
+import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
 import com.travel.demo.shareBoard.dto.ShareBoardResponseDTO;
+import com.travel.demo.shareBoard.dto.SharePlaceListDTO;
 import com.travel.demo.shareBoard.model.service.ShareBoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -42,9 +46,10 @@ public class ShareBoardController {
     }
 
     //게시글 조회
-    @GetMapping("/{post_id}")
-    public void getPost() {
-
+    @GetMapping("/{plan_id}")
+    public ResponseEntity<?> getPost(@PathVariable long plan_id) {
+        SharePlaceListDTO placeListDTO = shareBoardService.findVisitPlacesByPlanId(plan_id);
+        return ResponseEntity.ok(placeListDTO);
     }
 
     //게시글 삭제
@@ -57,5 +62,13 @@ public class ShareBoardController {
     @PutMapping("/edit/{post_id}")
     public void editPost() {
 
+    }
+
+    //게시된 플랜 내 플랜으로 저장
+    @PostMapping("/share/{plan_id}")
+    public String copyAddPlan(@PathVariable long plan_id, @RequestBody PlanAddRequest plan,
+                                      @RequestHeader("Authorization") String token) throws ParseException {
+        shareBoardService.copyAddPlan(token, plan_id, plan);
+        return "redirect:/basic/plans/{plan_id}";
     }
 }

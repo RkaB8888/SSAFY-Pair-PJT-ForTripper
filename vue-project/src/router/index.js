@@ -11,6 +11,7 @@ import PlanDetail from "@/views/Plan/PlanDetail.vue";
 import PlanDetailEdit from "@/views/Plan/PlanDetailEdit.vue";
 import ShareBoardMain from "@/views/ShareBoard/ShareBoardMain.vue";
 import ShareBoardAdd from "@/views/ShareBoard/ShareBoardAdd.vue";
+import SharePlanDetail from "@/views/ShareBoard/SharePlanDetail.vue";
 
 // 로그인 상태 체크 및 리다이렉트 경로 저장
 const onlyAuthUser = async (to, from, next) => {
@@ -113,7 +114,6 @@ const router = createRouter({
       name: "Plan",
       component: PlanHomeView,
       beforeEnter: onlyAuthUser,
-      component: PlanHomeView,
     },
     {
       path: "/plans/:plan_id",
@@ -139,6 +139,12 @@ const router = createRouter({
       name: "ShareBoardAdd",
       component: ShareBoardAdd,
       beforeEnter: onlyAuthUser,
+    },
+    {
+      path: "/planposts/:plan_id",
+      name: "SharePostView",
+      component: SharePlanDetail,
+      props: true,
     },
   ],
 });

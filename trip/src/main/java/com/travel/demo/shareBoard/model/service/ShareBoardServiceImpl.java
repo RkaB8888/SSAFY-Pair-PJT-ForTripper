@@ -3,13 +3,21 @@ package com.travel.demo.shareBoard.model.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.travel.demo.database.TempFileStorageService;
+import com.travel.demo.plan.domain.PlaceDomain;
+import com.travel.demo.plan.domain.PlanDomain;
+import com.travel.demo.plan.dto.PlaceListDTO;
+import com.travel.demo.plan.dto.PlanAddRequest;
+import com.travel.demo.plan.model.mapper.PlanMapper;
 import com.travel.demo.shareBoard.domain.ShareBoardDomain;
 import com.travel.demo.shareBoard.domain.SharePlaceSetDomain;
 import com.travel.demo.shareBoard.domain.SharePlanDomain;
 import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
 import com.travel.demo.shareBoard.domain.SharePlaceDomain;
 import com.travel.demo.shareBoard.dto.ShareBoardResponseDTO;
+import com.travel.demo.shareBoard.dto.SharePlaceListDTO;
 import com.travel.demo.shareBoard.entity.ShareBoardEntity;
+import com.travel.demo.shareBoard.entity.SharePlaceEntity;
+import com.travel.demo.shareBoard.entity.SharePlanEntity;
 import com.travel.demo.shareBoard.model.mapper.ShareBoardMapper;
 import com.travel.demo.users.model.mapper.AuthMapper;
 import com.travel.demo.util.JWTUtil;
@@ -21,10 +29,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +41,7 @@ public class ShareBoardServiceImpl implements ShareBoardService{
     private final AuthMapper authMapper;
     private final ShareBoardMapper shareMapper;
     private final ShareBoardMapper shareBoardMapper;
+    private final PlanMapper planMapper;
 
     @Override
     public int addSharePost(long plan_id, String token, ShareAddRequestDTO requestDTO) throws IOException, ParseException {
@@ -118,5 +125,89 @@ public class ShareBoardServiceImpl implements ShareBoardService{
             responseList.add(dto);
         }
         return responseList;
+    }
+
+    @Override
+    public SharePlaceListDTO findVisitPlacesByPlanId(Long planId) {
+        System.out.println("share plan place 찾기!");
+        List<SharePlaceEntity> list = shareMapper.findSharePlacesByPlanId(planId);
+        SharePlaceListDTO placeListDTO = new SharePlaceListDTO();
+        Map<String, List<SharePlaceListDTO.PlaceDTO>> dailySchedules = placeListDTO.getDailySchedules();
+
+        for (SharePlaceEntity sharePlaceEntity : list) {
+            SharePlaceListDTO.PlaceDTO cur = new SharePlaceListDTO.PlaceDTO();
+            cur.setId(sharePlaceEntity.getVisit_google_id());
+            cur.setDisplayName(sharePlaceEntity.getDisplay_name());
+            cur.setLocation(new SharePlaceListDTO.Location(sharePlaceEntity.getLatitude(), sharePlaceEntity.getLongitude()));
+            cur.setFormattedAddress(sharePlaceEntity.getAddress());
+            cur.setInternationalPhoneNumber(sharePlaceEntity.getPhone_number());
+            cur.setVisit_order(sharePlaceEntity.getVisit_order());
+
+            dailySchedules
+                    .computeIfAbsent(sharePlaceEntity.getVisit_date().toString(), k -> new ArrayList<>())
+                    .add(cur);
+        }
+
+        placeListDTO.setDailySchedules(dailySchedules);
+        return placeListDTO;
+    }
+
+    @Override
+    public void copyAddPlan(String token, Long planId, PlanAddRequest planAddRequest) throws ParseException {
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            String email = jwtUtil.getIdFromToken(token);
+            long user_id = authMapper.findByEmail(email).getUser_id();
+            PlanDomain domain = new PlanDomain();
+
+            //Plan 생성
+            domain.setUser_id(user_id);
+            domain.setPlan_title(planAddRequest.getPlan_title());
+            domain.setStart_date(planAddRequest.getStart_date());
+            domain.setEnd_date(planAddRequest.getEnd_date());
+            domain.setDescription(planAddRequest.getDescription());
+            planMapper.planAdd(domain);
+
+            //생성된 Plan 아이디 가져오기
+            long newPlanID = shareMapper.findPlanIdRecentByUserId(user_id);
+
+            //여행 첫 번째 날짜 찾기
+            LocalDate firstDate = shareMapper.findFirstDateByPlanId(planId);
+            LocalDate startDate = planAddRequest.getStart_date();
+
+            //두 날짜 사이의 날짜 차이 계산
+            long daysBetween = ChronoUnit.DAYS.between(firstDate, startDate);
+
+            SharePlaceListDTO placeListDTO = findVisitPlacesByPlanId(planId);
+            Map<String, List<SharePlaceListDTO.PlaceDTO>> schedules = placeListDTO.getDailySchedules();
+            for (String s : schedules.keySet()) {
+                List<SharePlaceListDTO.PlaceDTO> list = schedules.get(s);
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                Date visitedDate = formatter.parse(s);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(visitedDate);
+                calendar.add(Calendar.DATE, (int) daysBetween);
+                visitedDate = calendar.getTime();
+                for (SharePlaceListDTO.PlaceDTO placeDTO : list) {
+                    PlaceDomain place = new PlaceDomain();
+                    place.setPlan_id(newPlanID);
+                    place.setUser_id(user_id);
+                    place.setVisit_google_id(placeDTO.getId());
+                    place.setDisplay_name(placeDTO.getDisplayName());
+                    place.setLatitude(placeDTO.getLocation().getLat());
+                    place.setLongitude(placeDTO.getLocation().getLng());
+                    place.setAddress(placeDTO.getFormattedAddress());
+                    place.setPhone_number(placeDTO.getInternationalPhoneNumber());
+                    place.setVisit_date(visitedDate);
+                    place.setVisit_order(placeDTO.getVisit_order());
+                    System.out.println("얘 저장할거임 plan_id는: " +newPlanID);
+                    System.out.println(place);
+                    planMapper.addPlace(place);
+                }
+            }
+
+        } else {
+            throw new IllegalArgumentException("Invalid Authorization header!");
+        }
     }
 }
