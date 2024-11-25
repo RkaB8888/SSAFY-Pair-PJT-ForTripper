@@ -48,6 +48,7 @@ const onImageError = (event) => {
         </v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/search')">축제</v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/board')">게시판</v-btn>
+        <v-btn text class="nav-btn" @click="navigateTo('/planposts')">추천 플랜</v-btn>
       </div>
 
       <!-- Right Side: 로그인/회원가입 또는 다른 메뉴 -->
@@ -68,7 +69,7 @@ const onImageError = (event) => {
         </template>
         <template v-else>
           <!-- 로그인 상태 -->
-          <v-btn text class="nav-btn" @click="navigateTo('/plan')">계획</v-btn>
+          <v-btn text class="nav-btn" @click="navigateTo('/plans')">계획</v-btn>
           <v-btn text class="nav-btn" @click="navigateTo('/photos')">
             사진
           </v-btn>

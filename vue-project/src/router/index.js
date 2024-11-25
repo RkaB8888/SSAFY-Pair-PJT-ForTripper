@@ -6,6 +6,11 @@ import AuthView from "@/views/AuthView.vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
 import UserPage from "@/views/UserViews/UserPage.vue";
+import PlanHomeView from "@/views/Plan/PlanHomeView.vue";
+import PlanDetail from "@/views/Plan/PlanDetail.vue";
+import PlanDetailEdit from "@/views/Plan/PlanDetailEdit.vue";
+import ShareBoardMain from "@/views/ShareBoard/ShareBoardMain.vue";
+import ShareBoardAdd from "@/views/ShareBoard/ShareBoardAdd.vue";
 
 // 로그인 상태 체크 및 리다이렉트 경로 저장
 const onlyAuthUser = async (to, from, next) => {
@@ -102,6 +107,38 @@ const router = createRouter({
       path: "/auth/reset-password",
       name: "ResetPassword",
       component: () => import("@/views/UserViews/ResetPasswordView.vue"),
+    },
+    {
+      path: "/plans",
+      name: "Plan",
+      component: PlanHomeView,
+      beforeEnter: onlyAuthUser,
+      component: PlanHomeView,
+    },
+    {
+      path: "/plans/:plan_id",
+      name: "PlanDetail",
+      component: PlanDetail,
+      props: true,
+      beforeEnter: onlyAuthUser,
+    },
+    {
+      path: "/plans/:plan_id/edit",
+      name: "PlanDetailEdit",
+      component: PlanDetailEdit,
+      props: true,
+      beforeEnter: onlyAuthUser,
+    },
+    {
+      path: "/planposts",
+      name: "ShareBoardMain",
+      component: ShareBoardMain,
+    },
+    {
+      path: "/planposts/add",
+      name: "ShareBoardAdd",
+      component: ShareBoardAdd,
+      beforeEnter: onlyAuthUser,
     },
   ],
 });

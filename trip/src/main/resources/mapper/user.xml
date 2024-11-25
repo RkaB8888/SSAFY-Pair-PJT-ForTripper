@@ -16,7 +16,6 @@
         from users
         where email = #{email}
     </select>
-
     
     <!-- 닉네임 찾기 -->
     <select id="findByNickName" parameterType="string" resultType="UserEntity">
@@ -54,5 +53,4 @@
     <delete id="deleteUser">
         DELETE FROM users WHERE email = #{email}
     </delete>
-
 </mapper>

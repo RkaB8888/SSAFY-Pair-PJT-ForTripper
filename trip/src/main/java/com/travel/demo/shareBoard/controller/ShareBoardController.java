@@ -1,22 +1,44 @@
 package com.travel.demo.shareBoard.controller;
 
+import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
+import com.travel.demo.shareBoard.dto.ShareBoardResponseDTO;
+import com.travel.demo.shareBoard.model.service.ShareBoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/planposts")
 @RequiredArgsConstructor
 public class ShareBoardController {
 
+    private final ShareBoardService shareBoardService;
+
     //게시판 전체 조회
     @GetMapping("/")
-    public void getPosts() {
-
+    public ResponseEntity<?> getPosts() throws IOException {
+        List<ShareBoardResponseDTO> list = shareBoardService.findShareBoardList();
+        return ResponseEntity.ok(list);
     }
 
     //게시글 작성
-    @PostMapping("/add")
-    public void addPosts() {
+    @PostMapping(value = "/add/{plan_id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> addSharePlan(@PathVariable long plan_id, @ModelAttribute ShareAddRequestDTO requestDTO, HttpServletRequest request) {
+        try {
+            System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
+            String token = request.getHeader("Authorization");
+            System.out.println("공유되는 plan_id: " + plan_id);
+
+            shareBoardService.addSharePost(plan_id, token, requestDTO);
+
+            return ResponseEntity.ok("Plan added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing request: " + e.getMessage());
+        }
     }
 
     //게시글 조회

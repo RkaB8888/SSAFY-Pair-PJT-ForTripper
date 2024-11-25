@@ -44,6 +44,7 @@ public class PlanController {
     public String planAdd(HttpServletRequest request, @RequestBody PlanAddRequest planInfo) {
         System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
         String token = request.getHeader("Authorization");
+        System.out.println("토큰값: " + token);
         planService.PlanAdd(token, planInfo);
         System.out.println(planInfo);
         //토큰 파싱
