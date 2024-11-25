@@ -39,29 +39,39 @@ const onImageError = (event) => {
 
 <template>
   <!-- Navigation Bar -->
-  <v-app-bar color="grey lighten-4" dense>
+  <v-app-bar dense>
     <v-container class="d-flex align-center justify-space-between" fluid>
       <!-- Left Side: 로고, 탐색, 목록 -->
       <div class="left-section d-flex align-center">
         <v-btn class="logo-btn" @click="navigateTo('/')">
           <img src="/img/temp_logo.png" class="nav-logo" alt="Logo" />
         </v-btn>
-        <v-btn text class="nav-btn" @click="navigateTo('/search')">축제</v-btn>
-        <v-btn text class="nav-btn" @click="navigateTo('/board')">게시판</v-btn>
-        <v-btn text class="nav-btn" @click="navigateTo('/planposts')">추천 플랜</v-btn>
+        <v-btn text class="nav-btn text-h6" @click="navigateTo('/search')">
+          축제
+        </v-btn>
+        <v-btn text class="nav-btn text-h6" @click="navigateTo('/board')">
+          게시판
+        </v-btn>
+        <v-btn text class="nav-btn text-h6" @click="navigateTo('/planposts')">
+          추천 플랜
+        </v-btn>
       </div>
 
       <!-- Right Side: 로그인/회원가입 또는 다른 메뉴 -->
       <div class="right-section d-flex align-center">
         <template v-if="!isLogin">
           <!-- 비로그인 상태 -->
-          <v-btn outlined class="nav-btn" @click="navigateTo('/auth/login')">
+          <v-btn
+            outlined
+            class="nav-btn text-h6"
+            @click="navigateTo('/auth/login')"
+          >
             로그인
           </v-btn>
           <v-btn
             color="black"
             dark
-            class="nav-btn"
+            class="nav-btn text-h6"
             @click="navigateTo('/auth/regist')"
           >
             회원가입
@@ -69,12 +79,16 @@ const onImageError = (event) => {
         </template>
         <template v-else>
           <!-- 로그인 상태 -->
-          <v-btn text class="nav-btn" @click="navigateTo('/plans')">계획</v-btn>
-          <v-btn text class="nav-btn" @click="navigateTo('/photos')">
+          <v-btn text class="nav-btn text-h6" @click="navigateTo('/plans')">
+            계획
+          </v-btn>
+          <v-btn text class="nav-btn text-h6" @click="navigateTo('/photos')">
             사진
           </v-btn>
           <!-- 로그아웃 -->
-          <v-btn text class="nav-btn" @click="isLogout"> 로그아웃 </v-btn>
+          <v-btn text class="nav-btn text-h6" @click="isLogout">
+            로그아웃
+          </v-btn>
           <!-- 프로필 -->
           <v-avatar
             size="36"
@@ -111,6 +125,10 @@ const onImageError = (event) => {
   height: 36px;
   min-width: 36px;
   margin-right: 8px;
+  /* 1안 */
+  color: rgb(98, 0, 234);
+  /* 2안 */
+  /* color: rgb(72, 169, 166); */
 }
 
 /* 좌우 정렬 */
@@ -124,5 +142,8 @@ const onImageError = (event) => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+.avatar-image {
+  background-color: rgb(98, 0, 234);
 }
 </style>

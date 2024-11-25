@@ -316,7 +316,7 @@ const navigateToLogin = () => {
 
 /* 회원가입 카드 */
 .signup-card {
-  background-color: rgb(26, 156, 123);
+  background-color: rgb(98, 0, 234);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);

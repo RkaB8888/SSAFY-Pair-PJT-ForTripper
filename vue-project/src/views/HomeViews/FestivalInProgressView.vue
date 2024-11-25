@@ -53,7 +53,6 @@ const processedContactInfo = computed(() => {
     <v-img
       :src="festivalImage"
       class="post-preview-image"
-      @error="onImageError"
       alt="축제 이미지"
     ></v-img>
 

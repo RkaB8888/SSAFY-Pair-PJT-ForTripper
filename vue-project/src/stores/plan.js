@@ -2,7 +2,6 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import planApi from "@/api/planApi";
 import shareApi from "@/api/shareApi";
-import axios from "axios";
 
 export const usePlanStore = defineStore("plan", () => {
   //여행 계획 목록
@@ -134,16 +133,14 @@ export const usePlanStore = defineStore("plan", () => {
 
   const fetchShareBoard = async () => {
     try {
-      console.log('ShareBoard 데이터 로드 시작');
+      console.log("ShareBoard 데이터 로드 시작");
       const response = await shareApi.get("/");
       sharePosts.value = response.data;
       console.log(sharePosts.value);
     } catch (error) {
-      console.log('ShareBoard 데이터 로드 실패', error);
+      console.log("ShareBoard 데이터 로드 실패", error);
     }
   };
-
-
 
   return {
     addPlan,

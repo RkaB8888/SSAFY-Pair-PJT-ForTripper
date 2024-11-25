@@ -286,7 +286,6 @@ export const useAuthStore = defineStore("authStore", () => {
                 ? null
                 : response.data.profileImage,
           }; // 유저 정보 업데이트
-          console.log("닉네임 찾기로 가져온 유저 정보", response.data.userInfo);
           console.log("닉네임 찾기로 가져온 유저 정보", userInfo.value);
         } else {
           userInfo.value = {}; // 유저 정보 없음

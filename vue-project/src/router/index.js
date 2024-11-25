@@ -113,7 +113,6 @@ const router = createRouter({
       name: "Plan",
       component: PlanHomeView,
       beforeEnter: onlyAuthUser,
-      component: PlanHomeView,
     },
     {
       path: "/plans/:plan_id",

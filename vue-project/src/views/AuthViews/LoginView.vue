@@ -134,13 +134,7 @@ const login = async () => {
             </div> -->
 
             <!-- 로그인 버튼 -->
-            <v-btn
-              @click="login"
-              color="#1E88E5"
-              class="mt-2 login-btn"
-              block
-              large
-            >
+            <v-btn @click="login" class="mt-2 login-btn" block large>
               로그인
             </v-btn>
             <v-alert v-if="isLoginError" type="error" class="mt-4">
@@ -172,7 +166,7 @@ const login = async () => {
 
 /* 로그인 카드 */
 .login-card {
-  background-color: rgb(26, 156, 123);
+  background-color: rgb(98, 0, 234);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 카드 그림자 */
@@ -202,6 +196,7 @@ const login = async () => {
   border-radius: 8px;
   color: white; /* 텍스트 색상 */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 버튼 그림자 */
+  background-color: rgb(72, 169, 166);
 }
 .password-field {
   position: relative; /* 부모 요소를 기준으로 절대 배치 */

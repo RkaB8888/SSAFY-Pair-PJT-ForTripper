@@ -1,25 +1,34 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-
-const props = defineProps({
-  friends: {
-    type: Array,
-    required: true,
-  },
-});
+import { useFriendStore } from "@/stores/friend";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
+const friendStore = useFriendStore();
+const authStore = useAuthStore();
 
-const defaultProfileImage = "/img/temp_profile.png";
+const defaultProfileImage = authStore.defaultProfileImage;
+
+// 환경 변수에서 VITE_TRIP_API_URL 가져오기
+const { VITE_TRIP_API_URL } = import.meta.env;
 
 // 페이지당 친구 수
 const friendsPerPage = 10;
 
+const carouselIndex = ref(0);
+
+onMounted(async () => {
+  console.log("친구 목록 불러오기");
+  await friendStore.fetchFriends();
+});
+
+const friends = computed(() => friendStore.friends);
+
 const pagedFriends = computed(() => {
   const pages = [];
-  for (let i = 0; i < props.friends.length; i += friendsPerPage) {
-    pages.push(props.friends.slice(i, i + friendsPerPage));
+  for (let i = 0; i < friends.value.length; i += friendsPerPage) {
+    pages.push(friends.value.slice(i, i + friendsPerPage));
   }
   return pages;
 });
@@ -28,46 +37,82 @@ const goToFriendProfile = (nickname) => {
   router.push(`/user/${nickname}`);
 };
 
-const removeFriend = (friendId) => {
-  // 친구 해제 로직
-  alert(`친구 ID ${friendId}를 해제합니다.`);
+// 프로필 이미지 URL 설정 함수
+const getProfileImageUrl = (profileImagePath) => {
+  return profileImagePath
+    ? `${VITE_TRIP_API_URL}${profileImagePath}`
+    : defaultProfileImage;
 };
 </script>
+
 <template>
   <v-card class="friend-list">
     <v-card-title> 친구 목록 </v-card-title>
     <v-card-text>
       <v-row>
-        <v-col cols="12">
-          <v-carousel hide-delimiter-background height="150">
+        <!-- 왼쪽 네비게이션 버튼 -->
+        <v-col cols="1" class="d-flex align-center justify-center">
+          <v-btn
+            icon
+            @click="
+              carouselIndex =
+                (carouselIndex - 1 + pagedFriends.length) % pagedFriends.length
+            "
+          >
+            <v-icon>mdi-chevron-left</v-icon>
+          </v-btn>
+        </v-col>
+
+        <!-- 캐러셀 -->
+        <v-col cols="10">
+          <v-carousel
+            v-if="pagedFriends.length > 0"
+            v-model="carouselIndex"
+            hide-delimiter-background
+            height="200"
+            :show-arrows="false"
+          >
             <v-carousel-item v-for="(page, index) in pagedFriends" :key="index">
               <v-row>
                 <v-col
                   v-for="friend in page"
-                  :key="friend.id"
+                  :key="friend.email"
                   cols="12"
                   md="6"
-                  lg="4"
+                  lg="1"
                   class="text-center"
                 >
                   <v-avatar
                     size="64"
-                    @click="goToFriendProfile(friend.nickname)"
+                    @click="goToFriendProfile(friend.nickName)"
                     class="cursor-pointer"
                   >
                     <img
-                      :src="friend.profileImage || defaultProfileImage"
+                      :src="getProfileImageUrl(friend.profileImage)"
                       alt="Friend Profile"
+                      @error="(e) => (e.target.src = defaultProfileImage)"
+                      class="avatar-image"
                     />
                   </v-avatar>
-                  <p>{{ friend.nickname }}</p>
-                  <v-btn small color="error" @click="removeFriend(friend.id)"
-                    >친구 해제</v-btn
-                  >
+                  <p>{{ friend.nickName }}</p>
+                  <!-- 필요에 따라 친구 해제 버튼 추가 -->
                 </v-col>
               </v-row>
             </v-carousel-item>
           </v-carousel>
+          <div v-else>
+            <p>친구 목록이 없습니다.</p>
+          </div>
+        </v-col>
+
+        <!-- 오른쪽 네비게이션 버튼 -->
+        <v-col cols="1" class="d-flex align-center justify-center">
+          <v-btn
+            icon
+            @click="carouselIndex = (carouselIndex + 1) % pagedFriends.length"
+          >
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </v-card-text>
@@ -75,11 +120,11 @@ const removeFriend = (friendId) => {
 </template>
 
 <style scoped>
-.friend-list {
-  margin-top: 20px;
+.friend-list .v-carousel {
+  margin: 0;
 }
 
-.cursor-pointer {
-  cursor: pointer;
+.friend-list .v-btn {
+  background-color: transparent;
 }
 </style>

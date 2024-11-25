@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useFriendStore } from "@/stores/friend";
 
 const { VITE_TRIP_API_URL } = import.meta.env;
 
@@ -17,12 +18,13 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
+const authStore = useAuthStore();
+const friendStore = useFriendStore();
 
 const onImageError = (event) => {
-  // console.log("이미지 에러 발생");
   event.target.src = authStore.defaultProfileImage;
 };
+
 // 가입일자 포맷팅
 const formattedJoinDate = computed(() => {
   return new Date(props.user.joinDate).toLocaleDateString();
@@ -33,32 +35,43 @@ const profileImageUrl = computed(() => {
   const imageUrl = props.user.profileImage
     ? `${VITE_TRIP_API_URL}${props.user.profileImage}`
     : authStore.defaultProfileImage;
-  // console.log(imageUrl);
   return imageUrl;
 });
 
-// 친구 여부 (임시로 false로 설정)
-const isFriend = ref(false);
+// 친구 여부 확인
+onMounted(() => {
+  if (!props.isOwnProfile) {
+    friendStore.checkFriendStatus(props.user.nickname);
+  }
+});
 
+const isFriend = computed(() => friendStore.isFriend);
+
+// 프로필 수정
 const editProfile = () => {
   router.push("/user/edit");
 };
 
-const toggleFriend = () => {
+// 친구 추가/해제 토글
+const toggleFriend = async () => {
   if (isFriend.value) {
     // 친구 해제 로직
-    isFriend.value = false;
+    await friendStore.removeFriend(props.user.nickname);
+    alert("친구가 해제되었습니다.");
   } else {
     // 친구 추가 로직
-    isFriend.value = true;
+    await friendStore.addFriend(props.user.nickname);
+    alert("친구가 추가되었습니다.");
   }
 };
 
+// 유저 신고
 const reportUser = () => {
   // 유저 신고 로직
   alert("신고가 접수되었습니다.");
 };
 </script>
+
 <template>
   <v-row class="user-info-section">
     <v-col cols="12" md="4" class="text-center">
@@ -75,7 +88,7 @@ const reportUser = () => {
     <v-col cols="12" md="8">
       <!-- 닉네임 -->
       <h2>{{ user.nickname || "존재하지 않는 유저" }}</h2>
-      <!-- 가입일자 (주석 처리) -->
+      <!-- 가입일자 -->
       <p>가입일: {{ formattedJoinDate }}</p>
       <!-- 자신의 정보인 경우 -->
       <div v-if="isOwnProfile">
