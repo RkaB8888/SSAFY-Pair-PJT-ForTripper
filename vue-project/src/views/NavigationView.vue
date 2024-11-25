@@ -46,7 +46,7 @@ const onImageError = (event) => {
         <v-btn class="logo-btn" @click="navigateTo('/')">
           <img src="/img/temp_logo.png" class="nav-logo" alt="Logo" />
         </v-btn>
-        <v-btn text class="nav-btn" @click="navigateTo('/search')">탐색</v-btn>
+        <v-btn text class="nav-btn" @click="navigateTo('/search')">축제</v-btn>
         <v-btn text class="nav-btn" @click="navigateTo('/board')">게시판</v-btn>
       </div>
 

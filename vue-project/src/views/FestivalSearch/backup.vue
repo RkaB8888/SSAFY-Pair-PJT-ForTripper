@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
+import DatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 // 서비스 키 가져오기 (환경 변수 설정 필요)
 const serviceKey = import.meta.env.VITE_SERVICE_KEY;
@@ -16,10 +18,12 @@ const FESTIVAL_SEARCH_DATE_API =
 const activeTab = ref("date"); // 초기 탭을 '일정 기반 검색'으로 설정
 
 // 날짜 기반 검색 관련 데이터
-const startDateMenu = ref(false);
-const endDateMenu = ref(false);
 const eventStartDate = ref(getCurrentDate()); // 초기 시작일을 현재 날짜로 설정
 const eventEndDate = ref(""); // 종료일은 빈 값으로 설정
+
+// DatePicker 가시성 상태
+const startDatePickerVisible = ref(false);
+const endDatePickerVisible = ref(false);
 
 // 반응형 데이터 정의
 const areaCodes = ref([]); // 지역 코드 목록
@@ -205,69 +209,73 @@ const searchFestivals = async () => {
     let response;
     if (activeTab.value === "keyword") {
       // 키워드 기반 검색
-      // 필수 조건 확인
-      // if (!selectedAreaCode.value) {
-      //   error.value = "지역을 선택해주세요.";
-      //   loadingFestivals.value = false;
-      //   return;
-      // }
-      // if (!selectedSigunguCode.value) {
-      //   error.value = "시군구를 선택해주세요.";
-      //   loadingFestivals.value = false;
-      //   return;
-      // }
+      // 필수 조건 확인 (키워드만 필수)
       if (!keyword.value.trim()) {
         error.value = "키워드를 입력해주세요.";
         loadingFestivals.value = false;
         return;
       }
 
+      // API 요청 파라미터 설정
+      const params = {
+        numOfRows: numOfRows.value,
+        pageNo: pageNo.value,
+        MobileOS: "ETC",
+        MobileApp: "Search",
+        _type: "json",
+        listYN: "Y",
+        arrange: "A",
+        keyword: keyword.value,
+        contentTypeId: 15, // 축제 콘텐츠 타입 ID
+        serviceKey: serviceKey,
+      };
+
+      // 선택적으로 지역 코드와 시군구 코드를 추가
+      if (selectedAreaCode.value) {
+        params.areaCode = selectedAreaCode.value;
+      }
+      if (selectedSigunguCode.value) {
+        params.sigunguCode = selectedSigunguCode.value;
+      }
+
       response = await axios.get(FESTIVAL_SEARCH_KEYWORD_API, {
-        params: {
-          numOfRows: numOfRows.value,
-          pageNo: pageNo.value,
-          MobileOS: "ETC",
-          MobileApp: "Search",
-          _type: "json",
-          listYN: "Y",
-          arrange: "A",
-          keyword: keyword.value,
-          contentTypeId: 15, // 축제 콘텐츠 타입 ID
-          areaCode: selectedAreaCode.value || undefined,
-          sigunguCode: selectedSigunguCode.value || undefined,
-          serviceKey: serviceKey,
-        },
+        params: params,
       });
     } else if (activeTab.value === "date") {
       // 일정 기반 검색
-      // 필수 조건 확인
+      // 필수 조건 확인 (행사 시작일만 필수)
       if (!eventStartDate.value) {
         error.value = "행사 시작일을 선택해주세요.";
         loadingFestivals.value = false;
         return;
       }
-      // if (!selectedAreaCodeDate.value) {
-      //   error.value = "지역을 선택해주세요.";
-      //   loadingFestivals.value = false;
-      //   return;
-      // }
-      // 행사 종료일은 선택 사항이므로 필수 조건이 아님
+
+      // API 요청 파라미터 설정
+      const params = {
+        numOfRows: numOfRows.value,
+        pageNo: pageNo.value,
+        MobileOS: "ETC",
+        MobileApp: "searchFestival",
+        _type: "json",
+        listYN: "Y",
+        arrange: "A",
+        eventStartDate: eventStartDate.value,
+        serviceKey: serviceKey,
+      };
+
+      // 선택적으로 행사 종료일, 지역 코드, 시군구 코드를 추가
+      if (eventEndDate.value) {
+        params.eventEndDate = eventEndDate.value;
+      }
+      if (selectedAreaCodeDate.value) {
+        params.areaCode = selectedAreaCodeDate.value;
+      }
+      if (selectedSigunguCodeDate.value) {
+        params.sigunguCode = selectedSigunguCodeDate.value;
+      }
 
       response = await axios.get(FESTIVAL_SEARCH_DATE_API, {
-        params: {
-          numOfRows: numOfRows.value,
-          pageNo: pageNo.value,
-          MobileOS: "ETC",
-          MobileApp: "searchFestiuval",
-          _type: "json",
-          listYN: "Y",
-          arrange: "A",
-          eventStartDate: eventStartDate.value,
-          eventEndDate: eventEndDate.value || undefined, // 종료일이 비어있으면 제외
-          areaCode: selectedAreaCodeDate.value || undefined,
-          sigunguCode: selectedSigunguCodeDate.value || undefined, // 시군구 코드가 비어있으면 제외
-          serviceKey: serviceKey,
-        },
+        params: params,
       });
     }
 
@@ -292,12 +300,23 @@ const getImageUrl = (imagePath) => {
   if (imagePath.startsWith("http")) {
     return imagePath;
   }
-  return `https://your-backend-domain${imagePath}`; // 'your-backend-domain'을 실제 백엔드 도메인으로 교체(쓸 일 없을 듯)
+  return `https://your-backend-domain${imagePath}`; // 'your-backend-domain'을 실제 백엔드 도메인으로 교체
 };
 
 // 이미지 로딩 실패 시 기본 이미지로 대체
 const onImageError = (event) => {
   event.target.src = "/img/default_festival.png"; // 기본 이미지 경로
+};
+
+// DatePicker의 날짜 변경 시 호출되는 함수 (필요 시 추가 로직)
+const onStartDateChange = (newDate) => {
+  eventStartDate.value = newDate;
+  // 추가 로직이 필요하면 여기에 작성
+};
+
+const onEndDateChange = (newDate) => {
+  eventEndDate.value = newDate;
+  // 추가 로직이 필요하면 여기에 작성
 };
 
 // 컴포넌트 마운트 시 초기화
@@ -328,6 +347,7 @@ watch([numOfRows, pageNo], () => {
 
 // Watcher를 사용하여 탭 변경 시 초기 검색 수행
 watch(activeTab, (newTab, oldTab) => {
+  console.log("Active Tab changed from", oldTab, "to", newTab);
   if (newTab === "date") {
     // 날짜 기반 검색으로 변경 시 초기 검색 수행
     searchFestivals();
@@ -339,7 +359,6 @@ watch(activeTab, (newTab, oldTab) => {
   }
 });
 </script>
-
 <template>
   <v-container>
     <h1>축제 검색</h1>
@@ -351,8 +370,8 @@ watch(activeTab, (newTab, oldTab) => {
       slider-color="secondary"
       class="mb-4"
     >
-      <v-tab key="keyword">키워드 기반 검색</v-tab>
-      <v-tab key="date">일정 기반 검색</v-tab>
+      <v-tab value="keyword">키워드 기반 검색</v-tab>
+      <v-tab value="date">일정 기반 검색</v-tab>
     </v-tabs>
 
     <!-- 검색 조건 설정 -->
@@ -360,7 +379,7 @@ watch(activeTab, (newTab, oldTab) => {
       <!-- 키워드 기반 검색 폼 -->
       <v-col cols="12" v-if="activeTab === 'keyword'">
         <v-row>
-          <!-- 지역 코드 선택 -->
+          <!-- 지역 코드 선택 (선택 사항) -->
           <v-col cols="12" sm="4">
             <v-select
               :items="areaCodes"
@@ -371,12 +390,11 @@ watch(activeTab, (newTab, oldTab) => {
               :loading="loadingAreaCodes"
               :disabled="loadingAreaCodes"
               clearable
-              :rules="[(v) => !!v || '지역을 선택해주세요.']"
-              required
+              :rules="[]"
             ></v-select>
           </v-col>
 
-          <!-- 시군구 코드 선택 -->
+          <!-- 시군구 코드 선택 (선택 사항) -->
           <v-col cols="12" sm="4">
             <v-select
               :items="sigunguCodes"
@@ -384,15 +402,14 @@ watch(activeTab, (newTab, oldTab) => {
               item-value="code"
               label="시군구 선택"
               v-model="selectedSigunguCode"
-              :loading="loadingSigunguCodesDate"
-              :disabled="!selectedAreaCodeDate || loadingSigunguCodesDate"
+              :loading="loadingSigunguCodes"
+              :disabled="!selectedAreaCode || loadingSigunguCodes"
               clearable
-              :rules="[(v) => !!v || '시군구를 선택해주세요.']"
-              required
+              :rules="[]"
             ></v-select>
           </v-col>
 
-          <!-- 키워드 입력 -->
+          <!-- 키워드 입력 (필수) -->
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="keyword"
@@ -408,63 +425,58 @@ watch(activeTab, (newTab, oldTab) => {
       <!-- 일정 기반 검색 폼 -->
       <v-col cols="12" v-if="activeTab === 'date'">
         <v-row>
-          <!-- 행사 시작일 입력 -->
+          <!-- 행사 시작일 입력 (필수) -->
           <v-col cols="12" sm="4">
-            <v-menu
-              ref="startDateMenu"
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
+            <v-text-field
+              v-model="eventStartDate"
+              label="행사 시작일 (필수)"
+              :rules="[(v) => !!v || '행사 시작일을 선택해주세요.']"
+              required
             >
-              <template #activator="{ on, attrs }">
-                <v-text-field
-                  v-model="eventStartDate"
-                  label="행사 시작일 (필수)"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  :rules="[(v) => !!v || '행사 시작일을 선택해주세요.']"
-                  required
-                ></v-text-field>
+              <template #append>
+                <v-icon
+                  @click="startDatePickerVisible = true"
+                  class="cursor-pointer"
+                >
+                  mdi-calendar
+                </v-icon>
               </template>
-              <v-date-picker
+            </v-text-field>
+            <v-dialog v-model="startDatePickerVisible" max-width="290px">
+              <DatePicker
                 v-model="eventStartDate"
-                @input="startDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
+                format="yyyyMMdd"
+                :max="eventEndDate || null"
+                @close="startDatePickerVisible = false"
+                @update:modelValue="onStartDateChange"
+              />
+            </v-dialog>
           </v-col>
 
-          <!-- 행사 종료일 입력 -->
+          <!-- 행사 종료일 입력 (선택 사항) -->
           <v-col cols="12" sm="4">
-            <v-menu
-              ref="endDateMenu"
-              v-model="endDateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template #activator="{ on, attrs }">
-                <v-text-field
-                  v-model="eventEndDate"
-                  label="행사 종료일"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
+            <v-text-field v-model="eventEndDate" label="행사 종료일" readonly>
+              <template #append>
+                <v-icon
+                  @click="endDatePickerVisible = true"
+                  class="cursor-pointer"
+                >
+                  mdi-calendar
+                </v-icon>
               </template>
-              <v-date-picker
+            </v-text-field>
+            <v-dialog v-model="endDatePickerVisible" max-width="290px">
+              <DatePicker
                 v-model="eventEndDate"
-                @input="endDateMenu = false"
-              ></v-date-picker>
-            </v-menu>
+                format="yyyyMMdd"
+                :min="eventStartDate || null"
+                @close="endDatePickerVisible = false"
+                @update:modelValue="onEndDateChange"
+              />
+            </v-dialog>
           </v-col>
 
-          <!-- 지역 코드 선택 -->
+          <!-- 지역 코드 선택 (선택 사항) -->
           <v-col cols="12" sm="4">
             <v-select
               :items="areaCodes"
@@ -475,12 +487,11 @@ watch(activeTab, (newTab, oldTab) => {
               :loading="loadingAreaCodes"
               :disabled="loadingAreaCodes"
               clearable
-              :rules="[(v) => !!v || '지역을 선택해주세요.']"
-              required
+              :rules="[]"
             ></v-select>
           </v-col>
 
-          <!-- 시군구 코드 선택 -->
+          <!-- 시군구 코드 선택 (선택 사항) -->
           <v-col cols="12" sm="4">
             <v-select
               :items="sigunguCodesDate"
@@ -488,9 +499,10 @@ watch(activeTab, (newTab, oldTab) => {
               item-value="code"
               label="시군구 선택"
               v-model="selectedSigunguCodeDate"
-              :loading="loadingSigunguCodes"
-              :disabled="!selectedAreaCodeDate || loadingSigunguCodes"
+              :loading="loadingSigunguCodesDate"
+              :disabled="!selectedAreaCodeDate || loadingSigunguCodesDate"
               clearable
+              :rules="[]"
             ></v-select>
           </v-col>
         </v-row>
@@ -570,9 +582,9 @@ watch(activeTab, (newTab, oldTab) => {
                 ></v-img>
               </v-responsive>
               <v-card-title>{{ festival.title }}</v-card-title>
-              <v-card-subtitle
-                >{{ festival.addr1 }}, {{ festival.addr2 }}</v-card-subtitle
-              >
+              <v-card-subtitle>
+                {{ festival.addr1 }}, {{ festival.addr2 }}
+              </v-card-subtitle>
               <v-card-text>
                 <p><strong>전화번호:</strong> {{ festival.tel || "N/A" }}</p>
                 <p>
@@ -604,7 +616,6 @@ watch(activeTab, (newTab, oldTab) => {
     </v-row>
   </v-container>
 </template>
-
 <style scoped>
 .mb-4 {
   margin-bottom: 16px;
@@ -615,12 +626,11 @@ watch(activeTab, (newTab, oldTab) => {
 }
 
 /* 축제 이미지 우측 하단 정렬 */
-
 .v-img {
   object-position: bottom right;
 }
-/* 필수 입력 필드 표시 (Vuetify 기본 스타일 활용) */
 
+/* 필수 입력 필드 표시 (Vuetify 기본 스타일 활용) */
 input:required:invalid {
   border-color: red;
 }

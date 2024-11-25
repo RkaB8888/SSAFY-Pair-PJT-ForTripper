@@ -1,5 +1,5 @@
 <script setup>
-import FestivalSearchView from "@/views/Festival/FestivalSearchView.vue";
+import FestivalSearchView from "@/views/FestivalSearch/FestivalSearchView.vue";
 </script>
 
 <template>
