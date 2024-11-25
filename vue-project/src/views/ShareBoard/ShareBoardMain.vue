@@ -1,16 +1,28 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { usePlanStore } from "@/stores/plan";
+import ShareBoardList from "@/components/layout/ShareBoardList.vue";
 
 // Vue Router 사용
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia 스토어 인스턴스 가져오기
+const planStore = usePlanStore();
+const sharePosts = ref([]);
 
 // 라우팅 함수
 const navigateTo = (path) => {
   router.push(path);
 };
+
+//게시글 불러오기
+const fetchPosts = async () => {
+  await planStore.fetchShareBoard();
+  sharePosts.value = planStore.sharePosts;
+};
+
+onMounted(fetchPosts);
 </script>
 
 
@@ -18,7 +30,10 @@ const navigateTo = (path) => {
 <template>
     <h1>공유 게시판</h1>
     <v-btn @click="navigateTo('/planposts/add')">추가</v-btn>
-    <v-card
+    <ShareBoardList
+      :sharePosts="sharePosts"
+    />
+    <!-- <v-card
     class="mx-auto"
     max-width="400"
   >
@@ -46,6 +61,6 @@ const navigateTo = (path) => {
 
       <v-btn color="orange" text="Explore"></v-btn>
     </v-card-actions>
-  </v-card>
+  </v-card> -->
 </template>
 <style></style>

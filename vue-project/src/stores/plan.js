@@ -9,6 +9,8 @@ export const usePlanStore = defineStore("plan", () => {
   const plans = ref([]); //GET 요청을 통해 Plan List 데이터 저장
   //특정 여행 계획
   const plan = ref(null);
+  //shareBoard 게시글 목록
+  const sharePosts = ref([]);
 
   //여행 계획 추가
   const addPlan = async (planInfo) => {
@@ -130,6 +132,19 @@ export const usePlanStore = defineStore("plan", () => {
     }
   };
 
+  const fetchShareBoard = async () => {
+    try {
+      console.log('ShareBoard 데이터 로드 시작');
+      const response = await shareApi.get("/");
+      sharePosts.value = response.data;
+      console.log(sharePosts.value);
+    } catch (error) {
+      console.log('ShareBoard 데이터 로드 실패', error);
+    }
+  };
+
+
+
   return {
     addPlan,
     fetchPlans,
@@ -137,7 +152,9 @@ export const usePlanStore = defineStore("plan", () => {
     fetchVisitPlaceByDate,
     saveDailySchedules,
     addSharePlan,
+    fetchShareBoard,
     plans,
     plan,
+    sharePosts,
   };
 });

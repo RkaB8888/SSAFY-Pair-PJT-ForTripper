@@ -38,7 +38,6 @@ public class TempFileStorageService {
             Path filePath = uploadPath.resolve(newFilename);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
-
         return newFilename; // 저장된 파일 이름 반환
     }
 

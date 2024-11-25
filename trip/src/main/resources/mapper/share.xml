@@ -17,5 +17,17 @@
             (#{plan_id}, #{user_id}, #{total_date})
     </insert>
 
+    <insert id="addSharePlanPlace" parameterType="SharePlaceSetDomain">
+        insert into share_place
+            (plan_id, visit_google_id, display_name, latitude, longitude, address, phone_number, visit_date, visit_order)
+        values
+            (#{plan_id}, #{id}, #{displayName}, #{lat}, #{lng}, #{formattedAddress}, #{internationalPhoneNumber}, #{date}, #{order})
+    </insert>
+
+    <select id="findShareBoardAll">
+        select post_id, user_id, plan_id, title, content, created_time, modified_time, image_name
+        from share_board
+        order by post_id
+    </select>
 
 </mapper>

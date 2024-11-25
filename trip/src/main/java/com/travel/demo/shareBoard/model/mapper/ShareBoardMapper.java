@@ -1,11 +1,17 @@
 package com.travel.demo.shareBoard.model.mapper;
 
 import com.travel.demo.shareBoard.domain.ShareBoardDomain;
+import com.travel.demo.shareBoard.domain.SharePlaceSetDomain;
 import com.travel.demo.shareBoard.domain.SharePlanDomain;
+import com.travel.demo.shareBoard.entity.ShareBoardEntity;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface ShareBoardMapper {
-    int addSharePost(ShareBoardDomain sharePost);
-    int addSharePlan(SharePlanDomain sharePlan);
+    void addSharePost(ShareBoardDomain sharePost);
+    void addSharePlan(SharePlanDomain sharePlan);
+    void addSharePlanPlace(SharePlaceSetDomain sharePlace);
+    List<ShareBoardEntity> findShareBoardAll();
 }

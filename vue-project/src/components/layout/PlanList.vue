@@ -1,3 +1,22 @@
+<script setup>
+import { defineProps, defineEmits } from "vue";
+import NewPlanModal from "@/components/layout/NewPlanModal.vue";
+
+const props = defineProps(["plans"]);
+const emit = defineEmits(["storeSavePlan", "plan-created"]);
+
+const storeSavePlan = (plan) => {
+  emit("storeSavePlan", plan);
+};
+</script>
+
+<style scoped>
+.custom-card {
+  background-color: #e3f2fd !important;
+  border-color: #90caf9 !important;
+}
+</style>
+
 <template>
   <v-container>
     <v-row>
@@ -38,21 +57,3 @@
   </v-container>
 </template>
 
-<script setup>
-import { defineProps, defineEmits } from "vue";
-import NewPlanModal from "@/components/layout/NewPlanModal.vue";
-
-const props = defineProps(["plans"]);
-const emit = defineEmits(["storeSavePlan", "plan-created"]);
-
-const storeSavePlan = (plan) => {
-  emit("storeSavePlan", plan);
-};
-</script>
-
-<style scoped>
-.custom-card {
-  background-color: #e3f2fd !important;
-  border-color: #90caf9 !important;
-}
-</style>

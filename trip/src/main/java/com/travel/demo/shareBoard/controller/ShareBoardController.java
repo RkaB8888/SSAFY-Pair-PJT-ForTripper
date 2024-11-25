@@ -1,11 +1,15 @@
 package com.travel.demo.shareBoard.controller;
 
 import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
+import com.travel.demo.shareBoard.dto.ShareBoardResponseDTO;
 import com.travel.demo.shareBoard.model.service.ShareBoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/planposts")
@@ -16,8 +20,9 @@ public class ShareBoardController {
 
     //게시판 전체 조회
     @GetMapping("/")
-    public void getPosts() {
-
+    public ResponseEntity<?> getPosts() throws IOException {
+        List<ShareBoardResponseDTO> list = shareBoardService.findShareBoardList();
+        return ResponseEntity.ok(list);
     }
 
     //게시글 작성
@@ -27,24 +32,6 @@ public class ShareBoardController {
             System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
             String token = request.getHeader("Authorization");
             System.out.println("공유되는 plan_id: " + plan_id);
-//            System.out.println("토큰값: " + token);
-//            System.out.println("Title: " + requestDTO.getTitle());
-//            System.out.println("Content: " + requestDTO.getContent());
-//            System.out.println("Daily Schedules: " + requestDTO.getDailySchedules());
-//            System.out.println("Total Date: " + requestDTO.getTotalDate());
-//
-//            if (requestDTO.getImage() != null) {
-//                System.out.println("Image: " + requestDTO.getImage().getOriginalFilename());
-//            }
-//
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            Map<String, List<SharePlace>> dailySchedules = objectMapper.readValue(requestDTO.getDailySchedules(),
-//                    new TypeReference<Map<String, List<SharePlace>>>() {});
-//
-//            for (String s : dailySchedules.keySet()) {
-//                System.out.println(s);
-//                System.out.println(dailySchedules.get(s));
-//            }
 
             shareBoardService.addSharePost(plan_id, token, requestDTO);
 
