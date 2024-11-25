@@ -46,4 +46,6 @@ public class UserEntity {
     private LocalDateTime createDate;
     private LocalDateTime modifyDate;
     private int active;     //계정 활성화 여부
+    private int isVerified; // 이메일 인증 여부를 추적하는 새로운 필드
+    private String profileImage; // 프로필 이미지 경로 추가
 }

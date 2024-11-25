@@ -2,3 +2,9 @@
 .check {
   border: 1px solid black;
 }
+.avatar-image {
+  object-fit: contain; /* 비율을 유지하며 아바타 크기 안에 맞춤 */
+  width: 100%; /* v-avatar의 크기에 맞춤 */
+  height: 100%;
+  background-color: white;
+}

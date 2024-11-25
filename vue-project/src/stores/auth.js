@@ -10,6 +10,13 @@ import {
   // logout,
   userRegister,
   checkByToken,
+  resetPasswordRequest,
+  resetPassword,
+  updateProfileImageAPI,
+  updateNicknameAPI,
+  updatePasswordAPI,
+  deleteAccountAPI,
+  // getProfileIMG,
 } from "@/api/authApi";
 import { httpStatusCode } from "@/util/http-status";
 import { resetTokenRefreshFailed } from "@/util/http-commons";
@@ -19,21 +26,25 @@ export const useAuthStore = defineStore("authStore", () => {
   const isLogin = ref(false); //로그인 했는지 확인
   const isLoginError = ref(false); //로그인 에러가 있는지 확인
   const isValidToken = ref(false); //토큰 유효성 확인
-  const userInfo = ref({}); // 사용자 정보
+  const loginUserInfo = ref({}); // 사용자 정보
+  const userInfo = ref({});
 
+  const defaultProfileImage = "/img/Default_Profile.png";
   const initializeAuthState = async () => {
     const token = sessionStorage.getItem("accessToken");
     if (token) {
       try {
         await checkToken(); // 토큰 유효성 확인
+        loginUserInfo.value = { ...userInfo.value };
+        userInfo.value = {};
       } catch (error) {
         console.error("토큰 검증 실패:", error);
         isLogin.value = false;
-        userInfo.value = {}; // 초기화
+        loginUserInfo.value = {}; // 초기화
       }
     } else {
       isLogin.value = false;
-      userInfo.value = {}; // 초기화
+      loginUserInfo.value = {}; // 초기화
     }
   };
 
@@ -43,7 +54,9 @@ export const useAuthStore = defineStore("authStore", () => {
       (response) => {
         if (response.status === httpStatusCode.CREATE) {
           console.log("회원가입 성공!!!");
-          alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+          alert(
+            "회원가입이 완료되었습니다. 이메일을 확인하여 계정을 활성화하세요."
+          );
           router.push({ name: "login" });
         }
       },
@@ -82,9 +95,10 @@ export const useAuthStore = defineStore("authStore", () => {
   };
 
   const userLogout = async () => {
-    console.log(userInfo);
+    console.log(loginUserInfo);
     isLogin.value = false;
-    userInfo.value = {};
+    isLoginError.value = false; // 로그인 에러 상태 초기화
+    loginUserInfo.value = {};
     isValidToken.value = false;
     sessionStorage.clear();
     alert("로그아웃 되었습니다.");
@@ -96,7 +110,7 @@ export const useAuthStore = defineStore("authStore", () => {
     // Refresh Token이 없는 경우
     if (!refreshToken) {
       isLogin.value = false;
-      userInfo.value = {};
+      loginUserInfo.value = {};
       isValidToken.value = false;
       sessionStorage.clear();
       // 알림 및 리다이렉트 제거
@@ -115,7 +129,7 @@ export const useAuthStore = defineStore("authStore", () => {
       async (error) => {
         console.log("auth.js tokenRegeneration", error);
         isLogin.value = false;
-        userInfo.value = {};
+        loginUserInfo.value = {};
         isValidToken.value = false;
         sessionStorage.clear();
         // 알림 및 리다이렉트 제거
@@ -144,10 +158,11 @@ export const useAuthStore = defineStore("authStore", () => {
               isValidToken.value = true;
               isLogin.value = true; // 로그인 상태로 설정
               await getUserInfoById(userId);
-              console.log("getUserInfoById 이후 :", userInfo.value);
+              loginUserInfo.value = { ...userInfo.value };
+              console.log("getUserInfoById 이후 :", loginUserInfo.value);
             } else {
               console.warn("checkByToken 응답 실패");
-              userInfo.value = {};
+              loginUserInfo.value = {};
               isValidToken.value = false;
               isLogin.value = false; // 로그인 상태 해제
               sessionStorage.clear();
@@ -155,6 +170,7 @@ export const useAuthStore = defineStore("authStore", () => {
           },
           (error) => {
             console.error("checkByToken 에러:", error);
+            loginUserInfo.value = {};
             isValidToken.value = false;
             isLogin.value = false; // 로그인 상태 해제
             sessionStorage.clear();
@@ -162,7 +178,7 @@ export const useAuthStore = defineStore("authStore", () => {
         );
       } catch (error) {
         console.error("checkToken 실패:", error);
-        userInfo.value = {};
+        loginUserInfo.value = {};
         isValidToken.value = false;
         isLogin.value = false; // 로그인 상태 해제
         sessionStorage.clear();
@@ -171,7 +187,7 @@ export const useAuthStore = defineStore("authStore", () => {
       console.log("토큰이 존재하지 않음");
       isValidToken.value = false;
       isLogin.value = false; // 로그인 상태 해제
-      userInfo.value = {};
+      loginUserInfo.value = {};
       // API 호출 없이 종료
     }
   };
@@ -236,6 +252,11 @@ export const useAuthStore = defineStore("authStore", () => {
             name: response.data.name,
             nickname: response.data.nickname,
             role: response.data.role,
+            joinDate: response.data.joinDate,
+            profileImage:
+              response.data.profileImage === "null"
+                ? null
+                : response.data.profileImage,
           };
           console.log("유저 정보 저장 :", userInfo.value);
         } else {
@@ -244,6 +265,7 @@ export const useAuthStore = defineStore("authStore", () => {
         }
       },
       (error) => {
+        userInfo.value = {};
         console.error("유저 정보 조회 실패:", error);
       }
     );
@@ -253,17 +275,123 @@ export const useAuthStore = defineStore("authStore", () => {
       userNickName,
       (response) => {
         if (response.status === httpStatusCode.OK) {
-          userInfo.value = response.data.userInfo; // 유저 정보 업데이트
+          userInfo.value = {
+            email: response.data.email,
+            name: response.data.name,
+            nickname: response.data.nickname,
+            role: response.data.role,
+            joinDate: response.data.joinDate,
+            profileImage:
+              response.data.profileImage === "null"
+                ? null
+                : response.data.profileImage,
+          }; // 유저 정보 업데이트
+          console.log("닉네임 찾기로 가져온 유저 정보", response.data.userInfo);
+          console.log("닉네임 찾기로 가져온 유저 정보", userInfo.value);
         } else {
           userInfo.value = {}; // 유저 정보 없음
           console.log("유저 정보 없음");
         }
       },
       (error) => {
-        console.error("유저 정보 조회 실패:", error);
+        userInfo.value = {};
+        console.error("닉네임으로 유저 정보 조회 실패:", error);
       }
     );
   };
+  const requestPasswordReset = async (email) => {
+    await resetPasswordRequest(
+      { email },
+      (response) => {
+        console.log("비밀번호 재설정 이메일 전송 성공:", response.data.message);
+      },
+      (error) => {
+        console.error("비밀번호 재설정 이메일 전송 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const handleResetPassword = async (token, newPassword) => {
+    await resetPassword(
+      { token, newPassword },
+      (response) => {
+        console.log("비밀번호 재설정 성공:", response.data.message);
+      },
+      (error) => {
+        console.error("비밀번호 재설정 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const updateProfileImage = async (profileImageFile) => {
+    const formData = new FormData();
+    formData.append("profileImage", profileImageFile);
+
+    await updateProfileImageAPI(
+      formData,
+      (response) => {
+        console.log("프로필 사진 변경 성공:", response);
+        loginUserInfo.value.profileImage = response.data.profileImageUrl;
+      },
+      (error) => {
+        console.error("프로필 사진 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const updateNickname = async (newNickname) => {
+    await updateNicknameAPI(
+      { nickname: newNickname },
+      (response) => {
+        console.log("닉네임 변경 성공:", response.data);
+        userInfo.value.nickname = newNickname;
+      },
+      (error) => {
+        console.error("닉네임 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const updatePassword = async (currentPassword, newPassword) => {
+    await updatePasswordAPI(
+      { currentPassword, newPassword },
+      (response) => {
+        console.log("비밀번호 변경 성공:", response.data);
+      },
+      (error) => {
+        console.error("비밀번호 변경 실패:", error);
+        throw error;
+      }
+    );
+  };
+  const deleteAccount = async () => {
+    await deleteAccountAPI(
+      (response) => {
+        console.log("회원 탈퇴 성공:", response.data);
+        userLogout();
+      },
+      (error) => {
+        console.error("회원 탈퇴 실패:", error);
+        throw error;
+      }
+    );
+  };
+  // const getProfileImage = async (filename) => {
+  //   await getProfileIMG(
+  //     filename,
+  //     (response) => {
+  //       const blob = response.data; // 서버에서 반환된 Blob 데이터
+  //       const imageUrl = URL.createObjectURL(blob); // Blob 데이터를 렌더링 가능한 URL로 변환
+  //       userInfo.value.profileImage = imageUrl; // 이미지 URL을 저장
+  //       console.log("프로필 이미지 로드 성공:", imageUrl);
+  //     },
+  //     (error) => {
+  //       console.error("프로필 이미지 로드 실패:", error);
+  //       userInfo.value.profileImage = defaultProfileImage; // 실패 시 기본 이미지 사용
+  //     }
+  //   );
+  // };
+
   return {
     initializeAuthState,
     isLogin,
@@ -277,7 +405,16 @@ export const useAuthStore = defineStore("authStore", () => {
     getUserInfoByNickName,
     checkIdDuplicate,
     checkNickNameDuplicate,
+    loginUserInfo,
     userInfo,
     isValidToken,
+    requestPasswordReset,
+    handleResetPassword,
+    updateProfileImage,
+    updateNickname,
+    updatePassword,
+    deleteAccount,
+    defaultProfileImage,
+    // getProfileImage,
   };
 });

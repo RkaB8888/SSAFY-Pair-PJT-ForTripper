@@ -60,6 +60,12 @@ function localAxios() {
       if (status == httpStatusCode.UNAUTHORIZED) {
         const originalRequest = config;
 
+        // **로그인 요청 예외 처리 추가**
+        if (originalRequest.url.includes("/users/login")) {
+          // 로그인 실패 시 토큰 재발급 시도하지 않음
+          return Promise.reject(error);
+        }
+
         // `/users/refresh` 요청 자체가 실패한 경우
         if (originalRequest.url.includes("/users/refresh")) {
           console.error("리프레시 토큰 만료");
@@ -67,12 +73,21 @@ function localAxios() {
           sessionStorage.clear();
           alert("로그인이 필요합니다.");
           router.push({ name: "login" });
-          return;
+          return Promise.reject(error);
         }
 
         if (tokenRefreshFailed) {
           // 이미 토큰 재발급이 실패한 경우, 추가 처리 없이 거절
-          return;
+          return Promise.reject(error);
+        }
+
+        const refreshToken = sessionStorage.getItem("refreshToken");
+        if (!refreshToken) {
+          isTokenRefreshing = false;
+          sessionStorage.clear();
+          alert("로그인이 필요합니다.");
+          router.push({ name: "login" });
+          return Promise.reject(error);
         }
 
         //토큰 재발급 요청
@@ -81,7 +96,6 @@ function localAxios() {
 
           try {
             const authStore = useAuthStore();
-
             await authStore.tokenRegenerate();
 
             const newAccessToken = sessionStorage.getItem("accessToken");
@@ -104,7 +118,7 @@ function localAxios() {
             sessionStorage.clear();
             alert("로그인이 필요합니다.");
             router.push({ name: "login" }); // Vue Router로 로그인 페이지로 이동
-            return;
+            return Promise.reject(refreshError);
           }
         }
 
@@ -117,7 +131,7 @@ function localAxios() {
           })
           .catch((err) => {
             // 토큰 재발급 실패 시 요청 거절
-            return;
+            return Promise.reject(err);
           });
       }
 

@@ -1,5 +1,5 @@
 <script setup>
-import PopularFestivalsView from "@/views/HomeViews/PopularFestivalsView.vue";
+import FestivalsInProgressView from "@/views/HomeViews/FestivalsInProgressView.vue";
 import RecentBoardListView from "@/views/HomeViews/RecentBoardListView.vue";
 import RecentReviewsView from "@/views/HomeViews/RecentReviewsView.vue";
 </script>
@@ -7,11 +7,12 @@ import RecentReviewsView from "@/views/HomeViews/RecentReviewsView.vue";
 <template>
   <div>
     <!-- <h1>홈페이지 화면 입니다.</h1> -->
-    <PopularFestivalsView />
     <hr />
-    <RecentBoardListView />
+    <FestivalsInProgressView />
     <hr />
-    <RecentReviewsView />
+    <!-- <RecentBoardListView />
+    <hr />
+    <RecentReviewsView /> -->
   </div>
 </template>
 

@@ -5,8 +5,9 @@ import SearchView from "@/views/SearchView.vue";
 import AuthView from "@/views/AuthView.vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
+import UserPage from "@/views/UserViews/UserPage.vue";
 
-//로그인 상태 체크
+// 로그인 상태 체크 및 리다이렉트 경로 저장
 const onlyAuthUser = async (to, from, next) => {
   const authStore = useAuthStore();
   const { userInfo, isValidToken } = storeToRefs(authStore);
@@ -19,7 +20,8 @@ const onlyAuthUser = async (to, from, next) => {
     if (!isValidToken.value || !userInfo.value) {
       console.warn("유효하지 않은 사용자 상태, 로그인 페이지로 이동");
       if (to.name !== "login") {
-        next({ name: "login" });
+        // 원래 가려던 경로 저장
+        next({ name: "login", query: { redirect: to.fullPath } });
       } else {
         next();
       }
@@ -29,7 +31,8 @@ const onlyAuthUser = async (to, from, next) => {
   } catch (error) {
     console.error("토큰 검사 중 오류 발생:", error);
     if (to.name !== "login") {
-      next({ name: "login" });
+      // 원래 가려던 경로 저장
+      next({ name: "login", query: { redirect: to.fullPath } });
     } else {
       next();
     }
@@ -50,6 +53,18 @@ const router = createRouter({
       component: BoardView,
     },
     {
+      path: "/user/:nickname",
+      name: "UserPage",
+      component: UserPage,
+      beforeEnter: onlyAuthUser,
+    },
+    {
+      path: "/user/edit",
+      name: "EditProfile",
+      component: () => import("@/views/UserViews/EditProfileView.vue"),
+      beforeEnter: onlyAuthUser,
+    },
+    {
       path: "/auth",
       name: "auth",
       component: AuthView,
@@ -66,10 +81,14 @@ const router = createRouter({
           component: () => import("@/views/AuthViews/RegistView.vue"),
         },
         {
-          path: "mypage",
-          name: "mypage",
-          beforeEnter: onlyAuthUser,
-          component: () => import("@/views/UserViews/UserMyPage.vue"),
+          path: "forgot-password",
+          name: "ForgotPassword",
+          component: () => import("@/views/UserViews/ForgotPasswordView.vue"),
+        },
+        {
+          path: "reset-password",
+          name: "ResetPassword",
+          component: () => import("@/views/UserViews/ResetPasswordView.vue"),
         },
       ],
     },
@@ -78,6 +97,11 @@ const router = createRouter({
       name: "search",
       beforeEnter: onlyAuthUser,
       component: SearchView,
+    },
+    {
+      path: "/auth/reset-password",
+      name: "ResetPassword",
+      component: () => import("@/views/UserViews/ResetPasswordView.vue"),
     },
   ],
 });

@@ -4,10 +4,10 @@
 <mapper namespace="com.travel.demo.users.model.mapper.AuthMapper">
     <!-- 회원가입 -->
     <insert id="join" parameterType="UserSignUpRequest">
-        insert into users
-            (email, password, name, nickname, phone)
-        values
-            (#{email}, #{password}, #{name}, #{nickName}, #{phone})
+        INSERT INTO users
+            (email, password, name, nickname, phone, is_verified)
+        VALUES
+            (#{email}, #{password}, #{name}, #{nickName}, #{phone}, 0)
     </insert>
 
     <!-- 로그인 -->
@@ -16,8 +16,7 @@
         from users
         where email = #{email}
     </select>
-<<<<<<< HEAD
-=======
+
     
     <!-- 닉네임 찾기 -->
     <select id="findByNickName" parameterType="string" resultType="UserEntity">
@@ -25,5 +24,35 @@
         from users
         where nickname = #{nickName}
     </select>
->>>>>>> front
+    
+    <!-- 이메일 인증 상태 업데이트 -->
+    <update id="updateUserVerificationStatus" parameterType="UserEntity">
+        UPDATE users
+        SET is_verified = #{isVerified}
+        WHERE email = #{email}
+    </update>
+    
+    <update id="updatePassword" parameterType="UserEntity">
+    	UPDATE users SET password = #{password} WHERE email = #{email}
+	</update>
+	
+	<!-- 프로필 이미지 업데이트 -->
+    <update id="updateProfileImage">
+        UPDATE users
+        SET profile_image = #{profileImage}
+        WHERE email = #{email}
+    </update>
+
+    <!-- 닉네임 업데이트 -->
+    <update id="updateNickname">
+        UPDATE users
+        SET nickname = #{nickname}
+        WHERE email = #{email}
+    </update>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser">
+        DELETE FROM users WHERE email = #{email}
+    </delete>
+
 </mapper>

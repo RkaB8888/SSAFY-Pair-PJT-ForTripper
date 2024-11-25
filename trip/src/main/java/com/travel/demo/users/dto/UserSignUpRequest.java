@@ -34,4 +34,5 @@ public class UserSignUpRequest {
     private String nickName;
     @Schema(description = "휴대폰 번호", example = "01012345678")
     private String phone;
+    private boolean verified;
 }
