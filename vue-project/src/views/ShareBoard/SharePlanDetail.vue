@@ -171,7 +171,7 @@ onMounted(() => {
         <GoogleMapJustView
           :placesForSelectedDate="dailySchedules[selectedDate]"
           @select-place="savePlaceToDate"
-          class="fill-height"
+          ref="googleMap"
         />
       </v-col>
     </v-row>

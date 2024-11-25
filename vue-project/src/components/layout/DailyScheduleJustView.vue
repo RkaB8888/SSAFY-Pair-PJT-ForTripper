@@ -8,7 +8,10 @@
           :key="index"
           class="mb-1 d-flex justify-center align-center date-button"
           :class="{ 'selected-button': selectedDate === schedule.date }"
-          @click="$emit('select-date', schedule.date)"
+          @click="
+            $emit('select-date', schedule.date);
+            $emit('update-map-center', schedule.places[0]?.location);
+          "
         >
           <v-list-item-title class="text-center"
             >{{ index + 1 }}일</v-list-item-title

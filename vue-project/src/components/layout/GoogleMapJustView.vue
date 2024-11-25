@@ -1,13 +1,11 @@
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, watch, computed } from "vue";
 import { GoogleMap, Marker, Polyline } from "vue3-google-map";
 
 const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 const center = ref({ lat: 37.555946, lng: 126.97078780000001 });
 const zoom = ref(16);
-const placesForSelectedDate = ref([]); // 부모로부터 전달받은 장소 리스트
 const selectedPlace = ref(null);
-const polyline = ref(null); // Polyline 객체를 저장할 변수
 
 const props = defineProps({
   placesForSelectedDate: {
@@ -16,111 +14,59 @@ const props = defineProps({
   },
 });
 
-const visiblePlaces = computed(() => props.placesForSelectedDate);
+const emit = defineEmits(["select-place"]);
 
-// 장소 리스트가 변경되면 지도 중앙을 갱신
+// 중심 이동 기능
+const updateMapCenter = (location) => {
+  if (location?.lat && location?.lng) {
+    center.value = { lat: location.lat, lng: location.lng };
+    zoom.value = 14; // 적절한 줌 레벨
+  }
+};
+
+// 장소 선택 시 중심 이동 및 확대
+const zoomToMarker = (place) => {
+  updateMapCenter(place?.location);
+  zoom.value = 18;
+  selectedPlace.value = place;
+};
+
+// Prop 변경 감지
 watch(
-  placesForSelectedDate,
+  () => props.placesForSelectedDate,
   (newPlaces) => {
     if (newPlaces.length) {
-      const bounds = new google.maps.LatLngBounds();
-      newPlaces.forEach((place) => {
-        if (place.location) {
-          bounds.extend(place.location);
-        }
-      });
-      center.value = bounds.getCenter().toJSON();
-      zoom.value = 12;
-      // 지도에 경로 그리기
-      drawPolyline(newPlaces);
+      updateMapCenter(newPlaces[0]?.location); // 첫 번째 장소로 이동
     }
   },
   { immediate: true }
 );
-
-// 마커 클릭 시 장소의 상세 정보를 보여줌
-const showPlaceDetails = (place) => {
-  selectedPlace.value = place;
-  center.value = {
-    lat: place.location?.lat ?? 37.555946,
-    lng: place.location?.lng ?? 126.97078780000001,
-  };
-  zoom.value = 16;
-};
-
-const polylineOptions = computed(() => ({
-  path: visiblePlaces.value.map((place) => ({
-    lat: place.location?.lat ?? 0,
-    lng: place.location?.lng ?? 0,
-  })),
-  geodesic: true,
-  strokeColor: "#FF0000",
-  strokeOpacity: 1.0,
-  strokeWeight: 2,
-}));
-
-const zoomToMarker = (place) => {
-  center.value = {
-    lat: place.location?.lat ?? 37.555946,
-    lng: place.location?.lng ?? 126.97078780000001,
-  };
-  zoom.value = 18; // 줌 레벨을 더 높게 설정
-  selectedPlace.value = place;
-};
 </script>
 
 <template>
-  <div class="google-map-container">
-    <GoogleMap
-      :api-key="apiKey"
-      :center="center"
-      :zoom="zoom"
-      style="height: 100vh; width: 100%"
-      ref="map"
-    >
-      <Marker
-        v-for="(place, index) in visiblePlaces"
-        :key="place.id"
-        :options="{
-          position: {
-            lat: place.location?.lat ?? 0,
-            lng: place.location?.lng ?? 0,
-          },
-          label: (index + 1).toString(),
-          title: place.displayName ?? '',
-        }"
-        @click="zoomToMarker(place)"
-      >
-      </Marker>
-      <Polyline :options="polylineOptions" />
-    </GoogleMap>
-
-    <v-card
-      v-if="selectedPlace"
-      class="place-details-overlay ma-4"
-      max-width="400"
-    >
-      <v-card-title>{{ selectedPlace.displayName }}</v-card-title>
-      <v-card-text>
-        <p>주소: {{ selectedPlace.formattedAddress }}</p>
-        <p>
-          위치: {{ selectedPlace.location?.lat() }},
-          {{ selectedPlace.location?.lng() }}
-        </p>
-        <v-carousel
-          v-if="selectedPlace.photos && selectedPlace.photos.length > 0"
-          height="200"
-        >
-          <v-carousel-item
-            v-for="(photo, index) in selectedPlace.photos"
-            :key="index"
-            :src="photo.getURI({ maxHeight: 200 })"
-            cover
-          />
-        </v-carousel>
-      </v-card-text>
-    </v-card>
-  </div>
+  <GoogleMap
+    :api-key="apiKey"
+    :center="center"
+    :zoom="zoom"
+    style="height: 100vh; width: 100%"
+  >
+    <Marker
+      v-for="(place, index) in props.placesForSelectedDate"
+      :key="place.id"
+      :options="{
+        position: {
+          lat: place.location?.lat ?? 0,
+          lng: place.location?.lng ?? 0,
+        },
+        label: (index + 1).toString(),
+        title: place.displayName ?? '',
+      }"
+      @click="zoomToMarker(place)"
+    />
+    <Polyline
+      :options="{ path: props.placesForSelectedDate.map((p) => p.location) }"
+    />
+  </GoogleMap>
 </template>
 
 <style scoped>

@@ -146,16 +146,15 @@ onMounted(() => {
           :dateWithSchedules="dateWithSchedules"
           :selectedDate="selectedDate"
           :plan_id="plan.plan_id"
-          @save="handleSave"
           @select-date="selectDate"
-          @remove-place="removePlaceFromDate"
+          @update-map-center="updateMapCenter"
         />
       </v-col>
       <v-col cols="12" md="9">
         <GoogleMapJustView
           :placesForSelectedDate="dailySchedules[selectedDate]"
           @select-place="savePlaceToDate"
-          class="fill-height"
+          ref="googleMap"
         />
       </v-col>
     </v-row>
