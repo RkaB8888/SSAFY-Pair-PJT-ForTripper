@@ -1,3 +1,121 @@
+<template>
+  <v-container class="edit-profile-container">
+    <h1 class="text-h3 mb-6 text-center font-weight-bold">정보 수정</h1>
+
+    <!-- 프로필 사진 변경 -->
+    <v-card class="mb-6 profile-card elevation-1">
+      <v-card-title class="profile-card-title">
+        <v-icon left class="mr-2">mdi-camera</v-icon>
+        프로필 사진 변경
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text class="text-center">
+        <v-avatar size="150" class="mb-4 profile-avatar mx-auto">
+          <img
+            :src="profileImageUrl"
+            alt="Profile Image"
+            class="avatar-image"
+          />
+        </v-avatar>
+        <v-file-input
+          label="프로필 사진 업로드"
+          accept="image/*"
+          @change="onProfileImageChange"
+          :multiple="false"
+          prepend-icon="mdi-upload"
+          dense
+          hide-details
+          class="mb-4"
+        ></v-file-input>
+        <v-btn @click="updateProfileImage" class="update-btn"> 변경하기 </v-btn>
+      </v-card-text>
+    </v-card>
+
+    <!-- 닉네임 수정 -->
+    <v-card class="mb-6 profile-card elevation-1">
+      <v-card-title class="profile-card-title">
+        <v-icon left class="mr-2">mdi-account</v-icon>
+        닉네임 수정
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text>
+        <v-text-field
+          label="새 닉네임"
+          v-model="newNickname"
+          :error-messages="nicknameError"
+          prepend-icon="mdi-account-edit"
+          dense
+          hide-details
+          class="mb-4"
+        ></v-text-field>
+        <v-btn @click="updateNickname" class="update-btn"> 수정하기 </v-btn>
+      </v-card-text>
+    </v-card>
+
+    <!-- 비밀번호 수정 -->
+    <v-card class="mb-6 profile-card elevation-1">
+      <v-card-title class="profile-card-title">
+        <v-icon left class="mr-2">mdi-lock</v-icon>
+        비밀번호 수정
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text>
+        <v-text-field
+          label="현재 비밀번호"
+          v-model="currentPassword"
+          :type="showCurrentPassword ? 'text' : 'password'"
+          @click:append="showCurrentPassword = !showCurrentPassword"
+          :append-icon="showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          prepend-icon="mdi-lock"
+          dense
+          hide-details
+          class="mb-4"
+        ></v-text-field>
+        <v-text-field
+          label="새 비밀번호"
+          v-model="newPassword"
+          :type="showNewPassword ? 'text' : 'password'"
+          @click:append="showNewPassword = !showNewPassword"
+          :append-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          prepend-icon="mdi-lock-plus"
+          dense
+          hide-details
+          class="mb-4"
+        ></v-text-field>
+        <v-text-field
+          label="새 비밀번호 확인"
+          v-model="confirmNewPassword"
+          :type="showConfirmPassword ? 'text' : 'password'"
+          @click:append="showConfirmPassword = !showConfirmPassword"
+          :append-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          prepend-icon="mdi-lock-check"
+          dense
+          hide-details
+          class="mb-4"
+        ></v-text-field>
+        <v-btn @click="updatePassword" class="update-btn"> 변경하기 </v-btn>
+      </v-card-text>
+    </v-card>
+
+    <!-- 회원 탈퇴 -->
+    <v-card class="mb-6 profile-card elevation-1">
+      <v-card-title class="profile-card-title">
+        <v-icon left class="mr-2" color="error">mdi-account-remove</v-icon>
+        회원 탈퇴
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text>
+        <p class="mb-4">
+          회원 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+        </p>
+        <v-btn color="error" @click="deleteAccount" class="delete-btn">
+          회원 탈퇴
+        </v-btn>
+      </v-card-text>
+    </v-card>
+  </v-container>
+</template>
+
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
@@ -26,14 +144,15 @@ const showConfirmPassword = ref(false);
 const profileImageUrl = computed(() => {
   const imageUrl =
     profileImagePreview.value ||
-    `${VITE_TRIP_API_URL}${user.value.profileImage}` ||
-    authStore.defaultProfileImage;
-  // console.log("imageUrl:", imageUrl);
+    (user.value.profileImage
+      ? `${VITE_TRIP_API_URL}${user.value.profileImage}`
+      : authStore.defaultProfileImage);
   return imageUrl;
 });
+
 // 프로필 사진 변경
 const onProfileImageChange = (event) => {
-  const file = event.target.files[0]; // 선택된 첫 번째 파일
+  const file = event.target.files[0];
   if (!file) {
     profileImagePreview.value = null;
     return;
@@ -117,85 +236,68 @@ const deleteAccount = async () => {
 };
 </script>
 
-<template>
-  <v-container>
-    <h1>정보 수정</h1>
-    <!-- 프로필 사진 변경 -->
-    <v-card class="mb-4">
-      <v-card-title>프로필 사진 변경</v-card-title>
-      <v-card-text>
-        <v-avatar size="128" class="mb-4">
-          <img
-            :src="profileImageUrl"
-            alt="Profile Image"
-            class="avatar-image"
-          />
-        </v-avatar>
-        <v-file-input
-          label="프로필 사진 업로드"
-          accept="image/*"
-          @change="onProfileImageChange"
-          :multiple="false"
-        ></v-file-input>
-        <v-btn color="primary" @click="updateProfileImage">변경하기</v-btn>
-      </v-card-text>
-    </v-card>
-
-    <!-- 닉네임 수정 -->
-    <v-card class="mb-4">
-      <v-card-title>닉네임 수정</v-card-title>
-      <v-card-text>
-        <v-text-field
-          label="새 닉네임"
-          v-model="newNickname"
-          :error-messages="nicknameError"
-        ></v-text-field>
-        <v-btn color="primary" @click="updateNickname">수정하기</v-btn>
-      </v-card-text>
-    </v-card>
-
-    <!-- 비밀번호 수정 -->
-    <v-card class="mb-4">
-      <v-card-title>비밀번호 수정</v-card-title>
-      <v-card-text>
-        <v-text-field
-          label="현재 비밀번호"
-          v-model="currentPassword"
-          :type="showCurrentPassword ? 'text' : 'password'"
-          @click:append="showCurrentPassword = !showCurrentPassword"
-          append-icon="mdi-eye"
-        ></v-text-field>
-        <v-text-field
-          label="새 비밀번호"
-          v-model="newPassword"
-          :type="showNewPassword ? 'text' : 'password'"
-          @click:append="showNewPassword = !showNewPassword"
-          append-icon="mdi-eye"
-        ></v-text-field>
-        <v-text-field
-          label="새 비밀번호 확인"
-          v-model="confirmNewPassword"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          @click:append="showConfirmPassword = !showConfirmPassword"
-          append-icon="mdi-eye"
-        ></v-text-field>
-        <v-btn color="primary" @click="updatePassword">변경하기</v-btn>
-      </v-card-text>
-    </v-card>
-
-    <!-- 회원 탈퇴 -->
-    <v-card class="mb-4">
-      <v-card-title>회원 탈퇴</v-card-title>
-      <v-card-text>
-        <p>회원 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
-        <v-btn color="error" @click="deleteAccount">회원 탈퇴</v-btn>
-      </v-card-text>
-    </v-card>
-  </v-container>
-</template>
-
 <style scoped>
-.mb-4 {
+.edit-profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card-title {
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-avatar {
+  border: 2px solid rgb(98, 0, 234); /* 테마 컬러 적용 */
+  box-shadow: none;
+}
+
+.avatar-image {
+  object-fit: cover;
+}
+
+.update-btn,
+.delete-btn {
+  width: 100%;
+  height: 44px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.update-btn {
+  background-color: rgb(98, 0, 234);
+  color: white;
+}
+
+.delete-btn {
+  background-color: #ff5252;
+  color: white;
+}
+
+.v-text-field {
   margin-bottom: 16px;
+}
+
+.v-btn {
+  transition: all 0.3s ease;
+}
+
+.v-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 </style>

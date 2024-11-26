@@ -93,7 +93,7 @@ const onImageError = (event) => {
               <v-btn
                 text
                 class="nav-btn text-h6"
-                @click="navigateTo('/photos')"
+                @click="navigateTo('/user-search')"
               >
                 유저
               </v-btn>

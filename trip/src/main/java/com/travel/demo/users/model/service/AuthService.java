@@ -1,5 +1,6 @@
 package com.travel.demo.users.model.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,6 @@ public  interface AuthService {
 	boolean updateNickname(String email, String newNickname);
 	boolean updatePassword(String email, String currentPassword, String newPassword);
 	boolean deleteAccount(String email);
-
+	List<UserDomain> searchUsersByNickname(String nickname);
 
 }

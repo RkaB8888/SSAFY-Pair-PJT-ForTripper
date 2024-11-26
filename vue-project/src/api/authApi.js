@@ -15,6 +15,13 @@ async function checkByToken(success, fail) {
 // async function getProfileIMG(param, success, fail) {
 //   await local.get(`/profileIMG/${param}`).then(success).catch(fail);
 // }
+// 유저 닉네임으로 검색
+async function searchUsersByNickname(param, success, fail) {
+  await local
+    .get(`/users/search`, { params: { nickname: param } })
+    .then(success)
+    .catch(fail);
+}
 
 //post
 async function userConfirm(param, success, fail) {
@@ -78,4 +85,5 @@ export {
   updatePasswordAPI,
   deleteAccountAPI,
   // getProfileIMG,
+  searchUsersByNickname,
 };

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { usePlanStore } from "@/stores/plan";
 import PlanList from "@/components/layout/PlanList.vue";
 

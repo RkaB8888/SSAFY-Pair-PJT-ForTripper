@@ -11,8 +11,6 @@ const password = ref("");
 const confirmPassword = ref("");
 const passwordError = ref("");
 const confirmPasswordError = ref("");
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
 const message = ref("");
 const errorMessage = ref("");
 
@@ -21,10 +19,6 @@ const token = route.query.token;
 const validatePassword = () => {
   if (!password.value.trim()) {
     passwordError.value = "비밀번호를 입력해주세요.";
-    return false;
-  }
-  if (password.value.length < 8) {
-    passwordError.value = "비밀번호는 8자 이상이어야 합니다.";
     return false;
   } else {
     passwordError.value = "";
@@ -53,54 +47,51 @@ const resetPassword = async () => {
       }, 3000); // 3초 후 로그인 페이지로 이동
     } catch (error) {
       errorMessage.value =
-        error.response.data.message || "오류가 발생했습니다.";
+        error.response?.data?.message || "오류가 발생했습니다.";
       message.value = "";
     }
   }
 };
 </script>
+
 <template>
-  <v-container class="main fill-height" fluid>
+  <v-container class="reset-password-container">
     <v-row justify="center" align="center">
-      <v-col cols="10" md="5">
-        <v-card outlined>
+      <v-col cols="12" md="6" lg="4">
+        <v-card class="reset-password-card elevation-2">
+          <v-card-title class="text-h5 font-weight-bold">
+            비밀번호 재설정
+          </v-card-title>
           <v-card-text>
-            <h3>비밀번호 재설정</h3>
             <v-text-field
               label="새 비밀번호"
-              :type="showPassword ? 'text' : 'password'"
+              type="password"
               placeholder="새 비밀번호를 입력해주세요."
-              outlined
-              dense
               v-model="password"
               :error-messages="passwordError"
               @blur="validatePassword"
-            >
-              <v-btn icon @click="showPassword = !showPassword">
-                <v-icon>
-                  {{ showPassword ? "mdi-eye-off" : "mdi-eye" }}
-                </v-icon>
-              </v-btn>
-            </v-text-field>
-            <v-text-field
-              label="비밀번호 확인"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              placeholder="비밀번호를 다시 입력해주세요."
+              prepend-inner-icon="mdi-lock"
               outlined
               dense
+              hide-details
+              class="mb-4"
+            ></v-text-field>
+            <v-text-field
+              label="비밀번호 확인"
+              type="password"
+              placeholder="비밀번호를 다시 입력해주세요."
               v-model="confirmPassword"
               :error-messages="confirmPasswordError"
               @blur="validateConfirmPassword"
-            >
-              <v-btn icon @click="showConfirmPassword = !showConfirmPassword">
-                <v-icon>
-                  {{ showConfirmPassword ? "mdi-eye-off" : "mdi-eye" }}
-                </v-icon>
-              </v-btn>
-            </v-text-field>
+              prepend-inner-icon="mdi-lock-check"
+              outlined
+              dense
+              hide-details
+              class="mb-4"
+            ></v-text-field>
             <v-btn
               @click="resetPassword"
-              color="#1E88E5"
+              color="primary"
               class="mt-4"
               block
               large
@@ -121,5 +112,36 @@ const resetPassword = async () => {
 </template>
 
 <style scoped>
-/* 스타일링은 필요에 따라 추가하세요 */
+.reset-password-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.reset-password-card {
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.v-card-title {
+  color: rgb(98, 0, 234);
+  justify-content: center;
+}
+
+.v-text-field {
+  margin-bottom: 16px;
+}
+
+.v-text-field input {
+  font-size: 16px;
+}
+
+.v-btn {
+  height: 48px;
+  font-size: 16px;
+}
+
+.v-alert {
+  font-size: 14px;
+}
 </style>

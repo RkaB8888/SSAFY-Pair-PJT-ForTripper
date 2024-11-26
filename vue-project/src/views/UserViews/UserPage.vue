@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 import UserInfoSection from "@/views/UserViews/UserInfoSection.vue";
 import UserPostsTabs from "@/views/UserViews/UserPostsTabs.vue";
 import FriendList from "@/views/UserViews/FriendList.vue";
+import UndefinedView from "./UndefinedView.vue";
 import { storeToRefs } from "pinia";
 
 const route = useRoute();
@@ -19,7 +20,7 @@ const isOwnProfile = ref(false);
 const { loginUserInfo, userInfo } = storeToRefs(authStore);
 
 const loadUserData = async (nickname) => {
-  if (authStore.loginUserInfo.nickname === nickname) {
+  if (loginUserInfo.value.nickname === nickname) {
     // 자신의 프로필
     user.value = { ...loginUserInfo.value };
     isOwnProfile.value = true;
@@ -50,14 +51,23 @@ watch(
     <!-- 유저 정보 섹션 -->
     <UserInfoSection :user="user" :isOwnProfile="isOwnProfile" />
 
-    <!-- 게시글 탭 -->
-    <UserPostsTabs v-if="user.email" :user-email="user.email" />
-
-    <!-- 자신의 정보인 경우에만 친구 목록 표시 -->
-    <FriendList v-if="isOwnProfile" />
+    <!-- 여행 계획 목록 (자신의 프로필인 경우에만 표시) -->
+    <div v-if="isOwnProfile">
+      <UserPostsTabs
+        v-if="user.email"
+        :user-email="user.email"
+        :nickname="user.nickname"
+      />
+      <!-- 친구 목록 -->
+      <FriendList />
+    </div>
+    <!-- 비공개 메시지 -->
+    <div v-else>
+      <UndefinedView />
+    </div>
   </v-container>
 </template>
 
 <style scoped>
-/* 필요에 따라 스타일 추가 */
+/* 필요한 스타일 추가 */
 </style>

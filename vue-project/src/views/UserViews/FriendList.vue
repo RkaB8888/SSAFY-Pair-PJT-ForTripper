@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useFriendStore } from "@/stores/friend";
 import { useAuthStore } from "@/stores/auth";
@@ -13,25 +13,12 @@ const defaultProfileImage = authStore.defaultProfileImage;
 // 환경 변수에서 VITE_TRIP_API_URL 가져오기
 const { VITE_TRIP_API_URL } = import.meta.env;
 
-// 페이지당 친구 수
-const friendsPerPage = 24;
-
-const carouselIndex = ref(0);
-
 onMounted(async () => {
   console.log("친구 목록 불러오기");
   await friendStore.fetchFriends();
 });
 
 const friends = computed(() => friendStore.friends);
-
-const pagedFriends = computed(() => {
-  const pages = [];
-  for (let i = 0; i < friends.value.length; i += friendsPerPage) {
-    pages.push(friends.value.slice(i, i + friendsPerPage));
-  }
-  return pages;
-});
 
 const goToFriendProfile = (nickname) => {
   router.push(`/user/${nickname}`);
@@ -46,73 +33,41 @@ const getProfileImageUrl = (profileImagePath) => {
 </script>
 
 <template>
-  <v-card class="friend-list">
-    <v-card-title> 친구 목록 </v-card-title>
+  <v-card class="friend-list-card mb-6">
+    <v-card-title class="headline"> 친구 목록 </v-card-title>
+    <v-divider></v-divider>
     <v-card-text>
       <v-row>
-        <!-- 왼쪽 네비게이션 버튼 -->
-        <v-col cols="1" class="d-flex align-center justify-center">
-          <v-btn
-            icon
-            @click="
-              carouselIndex =
-                (carouselIndex - 1 + pagedFriends.length) % pagedFriends.length
-            "
+        <v-col
+          v-for="friend in friends"
+          :key="friend.email"
+          cols="6"
+          sm="4"
+          md="3"
+          lg="2"
+        >
+          <v-card
+            class="friend-card"
+            @click="goToFriendProfile(friend.nickName)"
+            outlined
+            hover
           >
-            <v-icon>mdi-chevron-left</v-icon>
-          </v-btn>
+            <v-card-text class="text-center">
+              <v-avatar size="80" class="mx-auto">
+                <img
+                  :src="getProfileImageUrl(friend.profileImage)"
+                  alt="Friend Profile"
+                  @error="(e) => (e.target.src = defaultProfileImage)"
+                />
+              </v-avatar>
+              <div class="mt-2 friend-nickname">
+                {{ friend.nickName }}
+              </div>
+            </v-card-text>
+          </v-card>
         </v-col>
-
-        <!-- 캐러셀 -->
-        <v-col cols="10">
-          <v-carousel
-            v-if="pagedFriends.length > 0"
-            v-model="carouselIndex"
-            hide-delimiter-background
-            height="200"
-            :show-arrows="false"
-          >
-            <v-carousel-item v-for="(page, index) in pagedFriends" :key="index">
-              <v-row>
-                <v-col
-                  v-for="friend in page"
-                  :key="friend.email"
-                  cols="12"
-                  md="1"
-                  lg="1"
-                  class="text-center"
-                >
-                  <v-avatar
-                    size="64"
-                    @click="goToFriendProfile(friend.nickName)"
-                    class="cursor-pointer"
-                  >
-                    <img
-                      :src="getProfileImageUrl(friend.profileImage)"
-                      alt="Friend Profile"
-                      @error="(e) => (e.target.src = defaultProfileImage)"
-                      class="avatar-image"
-                    />
-                  </v-avatar>
-                  <p>{{ friend.nickName }}</p>
-                  <!-- 필요에 따라 친구 해제 버튼 추가 -->
-                </v-col>
-              </v-row>
-            </v-carousel-item>
-          </v-carousel>
-          <div v-else>
-            <p>친구가 없습니다.</p>
-          </div>
-        </v-col>
-
-        <!-- 오른쪽 네비게이션 버튼 -->
-        <v-col cols="1" class="d-flex align-center justify-center">
-          <v-btn
-            icon
-            @click="carouselIndex = (carouselIndex + 1) % pagedFriends.length"
-          >
-            <v-icon>mdi-chevron-right</v-icon>
-          </v-btn>
+        <v-col v-if="friends.length === 0" cols="12">
+          <p>친구가 없습니다.</p>
         </v-col>
       </v-row>
     </v-card-text>
@@ -120,11 +75,16 @@ const getProfileImageUrl = (profileImagePath) => {
 </template>
 
 <style scoped>
-.friend-list .v-carousel {
-  margin: 0;
+.friend-list-card {
+  padding: 20px;
 }
 
-.friend-list .v-btn {
-  background-color: transparent;
+.friend-card {
+  cursor: pointer;
+}
+
+.friend-nickname {
+  font-size: 16px;
+  color: rgb(98, 0, 234);
 }
 </style>

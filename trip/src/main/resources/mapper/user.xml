@@ -23,7 +23,9 @@
         from users
         where nickname = #{nickName}
     </select>
-    
+    <select id="findByNicknameContaining" parameterType="String" resultType="UserDomain">
+  		SELECT * FROM users WHERE nickname LIKE CONCAT('%', #{nickname}, '%')
+	</select>
     <!-- 이메일 인증 상태 업데이트 -->
     <update id="updateUserVerificationStatus" parameterType="UserEntity">
         UPDATE users

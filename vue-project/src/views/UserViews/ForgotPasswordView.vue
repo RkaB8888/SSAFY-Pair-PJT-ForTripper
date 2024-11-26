@@ -38,25 +38,28 @@ const requestPasswordReset = async () => {
   }
 };
 </script>
+
 <template>
-  <v-container class="main fill-height" fluid>
+  <v-container class="password-reset-container">
     <v-row justify="center" align="center">
-      <v-col cols="10" md="5">
-        <v-card outlined>
+      <v-col cols="12" md="6" lg="4">
+        <v-card class="password-reset-card elevation-2">
+          <v-card-title class="text-h5 font-weight-bold">
+            비밀번호 재설정
+          </v-card-title>
           <v-card-text>
-            <h3>비밀번호 재설정</h3>
             <v-text-field
               label="이메일"
-              placeholder="abc1234@naver.com"
-              outlined
-              dense
+              placeholder="example@example.com"
               v-model="email"
               :error-messages="emailError"
               @blur="validateEmail"
+              prepend-inner-icon="mdi-email"
+              outlined
             />
             <v-btn
               @click="requestPasswordReset"
-              color="#1E88E5"
+              color="primary"
               class="mt-4"
               block
               large
@@ -77,5 +80,32 @@ const requestPasswordReset = async () => {
 </template>
 
 <style scoped>
-/* 스타일링은 필요에 따라 추가하세요 */
+.password-reset-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.password-reset-card {
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.v-card-title {
+  color: rgb(98, 0, 234);
+  justify-content: center;
+}
+
+.v-text-field input {
+  font-size: 16px;
+}
+
+.v-btn {
+  height: 48px;
+  font-size: 16px;
+}
+
+.v-alert {
+  font-size: 14px;
+}
 </style>

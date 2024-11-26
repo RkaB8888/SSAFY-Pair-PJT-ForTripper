@@ -52,6 +52,12 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: "/user-search",
+      name: "UserSerch",
+      component: () => import("@/views/UserViews/UserSearchView.vue"),
+      beforeEnter: onlyAuthUser,
+    },
+    {
       path: "/user/:nickname",
       name: "UserPage",
       component: () => import("@/views/UserViews/UserPage.vue"),
