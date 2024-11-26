@@ -1,6 +1,5 @@
 package com.travel.demo.shareBoard.controller;
 
-import com.travel.demo.plan.dto.PlaceListDTO;
 import com.travel.demo.plan.dto.PlanAddRequest;
 import com.travel.demo.shareBoard.dto.ShareAddRequestDTO;
 import com.travel.demo.shareBoard.dto.ShareBoardResponseDTO;
@@ -31,14 +30,14 @@ public class ShareBoardController {
 
     //게시글 작성
     @PostMapping(value = "/add/{plan_id}", consumes = "multipart/form-data")
-    public ResponseEntity<?> addSharePlan(@PathVariable long plan_id, @ModelAttribute ShareAddRequestDTO requestDTO, HttpServletRequest request) {
+    public ResponseEntity<?> addSharePlan(@PathVariable("plan_id") long plan_id, @ModelAttribute ShareAddRequestDTO requestDTO, HttpServletRequest request) {
         try {
             System.out.println(request.getHeader("Authorization")); //헤더에서 인증정보(토큰)갖고옴
             String token = request.getHeader("Authorization");
             System.out.println("공유되는 plan_id: " + plan_id);
 
             shareBoardService.addSharePost(plan_id, token, requestDTO);
-
+            System.out.println("저장됐나?");
             return ResponseEntity.ok("Plan added successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error processing request: " + e.getMessage());
@@ -47,7 +46,7 @@ public class ShareBoardController {
 
     //게시글 조회
     @GetMapping("/{plan_id}")
-    public ResponseEntity<?> getPost(@PathVariable long plan_id) {
+    public ResponseEntity<?> getPost(@PathVariable("plan_id") long plan_id) {
         SharePlaceListDTO placeListDTO = shareBoardService.findVisitPlacesByPlanId(plan_id);
         return ResponseEntity.ok(placeListDTO);
     }
@@ -66,7 +65,7 @@ public class ShareBoardController {
 
     //게시된 플랜 내 플랜으로 저장
     @PostMapping("/share/{plan_id}")
-    public String copyAddPlan(@PathVariable long plan_id, @RequestBody PlanAddRequest plan,
+    public String copyAddPlan(@PathVariable("plan_id") long plan_id, @RequestBody PlanAddRequest plan,
                                       @RequestHeader("Authorization") String token) throws ParseException {
         shareBoardService.copyAddPlan(token, plan_id, plan);
         return "redirect:/basic/plans/{plan_id}";

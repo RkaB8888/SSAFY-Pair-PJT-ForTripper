@@ -3,10 +3,8 @@ import { ref } from "vue";
 
 // 각 탭에 해당하는 컴포넌트 임포트
 import PlanList from "@/views/UserViews/PlanList.vue";
-import ReviewList from "@/views/UserViews/ReviewList.vue";
-import FreePostList from "@/views/UserViews/FreePostList.vue";
 
-const props = defineProps({
+defineProps({
   userEmail: {
     type: String,
     required: true,
