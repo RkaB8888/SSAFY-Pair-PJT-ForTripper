@@ -1,18 +1,14 @@
 <script setup>
+import MainBanner from "@/components/MainBanner.vue";
 import FestivalsInProgressView from "@/views/HomeViews/FestivalsInProgressView.vue";
-import RecentBoardListView from "@/views/HomeViews/RecentBoardListView.vue";
-import RecentReviewsView from "@/views/HomeViews/RecentReviewsView.vue";
 </script>
 
 <template>
   <div>
-    <!-- <h1>홈페이지 화면 입니다.</h1> -->
-    <hr />
+    <!-- 메인 배너 추가 -->
+    <MainBanner />
     <FestivalsInProgressView />
     <hr />
-    <!-- <RecentBoardListView />
-    <hr />
-    <RecentReviewsView /> -->
   </div>
 </template>
 

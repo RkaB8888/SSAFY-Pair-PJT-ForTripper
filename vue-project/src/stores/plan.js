@@ -2,7 +2,6 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import planApi from "@/api/planApi";
 import shareApi from "@/api/shareApi";
-import axios from "axios";
 
 export const usePlanStore = defineStore("plan", () => {
   //여행 계획 목록

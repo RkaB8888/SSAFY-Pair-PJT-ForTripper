@@ -5,7 +5,6 @@ import SearchView from "@/views/SearchView.vue";
 import AuthView from "@/views/AuthView.vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
-import UserPage from "@/views/UserViews/UserPage.vue";
 import PlanHomeView from "@/views/Plan/PlanHomeView.vue";
 import PlanDetail from "@/views/Plan/PlanDetail.vue";
 import PlanDetailEdit from "@/views/Plan/PlanDetailEdit.vue";
@@ -61,7 +60,7 @@ const router = createRouter({
     {
       path: "/user/:nickname",
       name: "UserPage",
-      component: UserPage,
+      component: () => import("@/views/UserViews/UserPage.vue"),
       beforeEnter: onlyAuthUser,
     },
     {

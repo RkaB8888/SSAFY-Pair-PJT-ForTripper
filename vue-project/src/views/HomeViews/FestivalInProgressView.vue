@@ -28,22 +28,49 @@ const festivalImage = computed(() => {
 const processedContactInfo = computed(() => {
   const tel = props.festival.tel || "N/A";
 
-  // HTML 태그를 포함한 경우
-  if (/<\/?[a-z][\s\S]*>/i.test(tel)) {
-    const linkMatch = tel.match(/href="([^"]+)"/); // 링크 추출
+  // 정규식 패턴 정의
+  const anchorTagRegex = /<a[^>]*href=['"]([^'"]+)['"][^>]*>([^<]*)<\/a>/i;
+  const urlRegex = /^(https?:\/\/[^\s]+)$/i;
+
+  if (anchorTagRegex.test(tel)) {
+    // `<a>` 태그에서 href와 링크 텍스트 추출
+    const linkMatch = tel.match(anchorTagRegex);
     const link = linkMatch ? linkMatch[1] : null;
+    const linkText = linkMatch ? linkMatch[2] : null;
 
     return {
       tel: "N/A", // 전화번호를 N/A로 표시
       instagram: link ? link : null, // 인스타그램 링크 추출
+      instagramText: linkText ? linkText : link,
+    };
+  } else if (urlRegex.test(tel)) {
+    // `tel`이 URL인 경우
+    return {
+      tel: "N/A",
+      instagram: tel,
+      instagramText: tel,
+    };
+  } else {
+    // 일반 텍스트인 경우 (전화번호)
+    return {
+      tel: tel,
+      instagram: null,
+      instagramText: null,
     };
   }
+});
 
-  // 일반 텍스트인 경우
-  return {
-    tel: tel,
-    instagram: null,
-  };
+// 네이버 검색 URL 생성
+const naverSearchUrl = computed(() => {
+  const baseUrl = "https://search.naver.com/search.naver";
+  const params = new URLSearchParams({
+    where: "nexearch",
+    sm: "top_hty",
+    fbm: "0",
+    ie: "utf8",
+    query: props.festival.title,
+  });
+  return `${baseUrl}?${params.toString()}`;
 });
 </script>
 
@@ -53,7 +80,6 @@ const processedContactInfo = computed(() => {
     <v-img
       :src="festivalImage"
       class="post-preview-image"
-      @error="onImageError"
       alt="축제 이미지"
     ></v-img>
 
@@ -67,20 +93,35 @@ const processedContactInfo = computed(() => {
 
     <!-- 연락처 정보 -->
     <v-card-text class="card-text">
-      <p><strong>전화번호:</strong> {{ processedContactInfo.tel }}</p>
-      <p v-if="processedContactInfo.instagram">
+      <p v-if="processedContactInfo.tel !== 'N/A'">
+        <strong>전화번호:</strong> {{ processedContactInfo.tel }}
+      </p>
+      <p v-else-if="processedContactInfo.instagram">
         <strong>인스타그램 DM:</strong>
         <a
           :href="processedContactInfo.instagram"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ processedContactInfo.instagram }}
+          인스타그램으로 이동
         </a>
       </p>
     </v-card-text>
+
+    <!-- 네이버 검색 버튼 -->
+    <v-card-actions>
+      <v-btn
+        color="green"
+        :href="naverSearchUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        네이버에서 검색
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
+
 <style scoped>
 .festival-card {
   width: 300px;

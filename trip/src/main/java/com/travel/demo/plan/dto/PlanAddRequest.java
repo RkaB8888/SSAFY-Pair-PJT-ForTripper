@@ -4,12 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 @Schema(title="Plan : Plan 생성 DTO")
 public class PlanAddRequest {
     @NotBlank(message = "여행 계획에 대한 이름을 입력해주세요.")

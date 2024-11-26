@@ -196,7 +196,54 @@ const handleAreaCodeChangeDate = (newAreaCode) => {
   pageNo.value = 1;
   totalCount.value = 0;
 };
+// 전화번호와 인스타그램 링크 처리 함수
+const getProcessedContactInfo = (tel) => {
+  tel = tel || "N/A";
 
+  // 정규식 패턴 정의
+  const anchorTagRegex = /<a[^>]*href=['"]([^'"]+)['"][^>]*>([^<]*)<\/a>/i;
+  const urlRegex = /^(https?:\/\/[^\s]+)$/i;
+
+  if (anchorTagRegex.test(tel)) {
+    // `<a>` 태그에서 href와 링크 텍스트 추출
+    const linkMatch = tel.match(anchorTagRegex);
+    const link = linkMatch ? linkMatch[1] : null;
+    const linkText = linkMatch ? linkMatch[2] : null;
+
+    return {
+      tel: "N/A", // 전화번호를 N/A로 표시
+      instagram: link ? link : null, // 인스타그램 링크 추출
+      instagramText: linkText ? linkText : link,
+    };
+  } else if (urlRegex.test(tel)) {
+    // `tel`이 URL인 경우
+    return {
+      tel: "N/A",
+      instagram: tel,
+      instagramText: tel,
+    };
+  } else {
+    // 일반 텍스트인 경우 (전화번호)
+    return {
+      tel: tel,
+      instagram: null,
+      instagramText: null,
+    };
+  }
+};
+
+// 네이버 검색 URL 생성 함수
+const getNaverSearchUrl = (title) => {
+  const baseUrl = "https://search.naver.com/search.naver";
+  const params = new URLSearchParams({
+    where: "nexearch",
+    sm: "top_hty",
+    fbm: "0",
+    ie: "utf8",
+    query: title,
+  });
+  return `${baseUrl}?${params.toString()}`;
+};
 // 축제 검색 함수
 const searchFestivals = async () => {
   loadingFestivals.value = true;
@@ -631,24 +678,34 @@ watch(activeTab, (newTab, oldTab) => {
                 {{ festival.addr1 }}, {{ festival.addr2 }}
               </v-card-subtitle>
               <v-card-text>
-                <p><strong>전화번호:</strong> {{ festival.tel || "N/A" }}</p>
-                <p>
-                  <strong>카테고리:</strong> {{ festival.cat1 }} >
-                  {{ festival.cat2 }} > {{ festival.cat3 }}
+                <p v-if="getProcessedContactInfo(festival.tel).tel !== 'N/A'">
+                  <strong>전화번호:</strong>
+                  {{ getProcessedContactInfo(festival.tel).tel }}
                 </p>
-                <p>
-                  <strong>지역 코드:</strong> {{ festival.areacode }},
-                  {{ festival.sigungucode }}
+                <p v-else-if="getProcessedContactInfo(festival.tel).instagram">
+                  <strong>인스타그램 DM:</strong>
+                  <a
+                    :href="getProcessedContactInfo(festival.tel).instagram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {{ getProcessedContactInfo(festival.tel).instagramText }}
+                  </a>
                 </p>
-                <p>
-                  <strong>지도 좌표:</strong> X: {{ festival.mapx }}, Y:
-                  {{ festival.mapy }}
-                </p>
-                <p><strong>수정 시간:</strong> {{ festival.modifiedtime }}</p>
-                <p><strong>생성 시간:</strong> {{ festival.createdtime }}</p>
-                <p><strong>저작권:</strong> {{ festival.cpyrhtDivCd }}</p>
-                <p><strong>여행 도서:</strong> {{ festival.booktour }}</p>
+                <p v-else><strong>전화번호:</strong> N/A</p>
               </v-card-text>
+              <!-- 네이버 검색 버튼 추가 -->
+              <v-card-actions>
+                <v-btn
+                  color="green"
+                  :href="getNaverSearchUrl(festival.title)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  block
+                >
+                  네이버에서 검색
+                </v-btn>
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
@@ -762,8 +819,8 @@ input:required:invalid {
 /* 스크롤 투 탑 버튼 스타일 */
 .scroll-top {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
+  bottom: 90px;
+  right: 25px;
   z-index: 1000;
 }
 </style>

@@ -30,7 +30,7 @@ public class PlanController {
 
     //특정 계획 불러오기
     @GetMapping("/{plan_id}")
-    public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable long plan_id) throws Exception {
+    public ResponseEntity<?> planDetail(HttpServletRequest request, @PathVariable("plan_id") long plan_id) throws Exception {
         System.out.println("planDetail 호출! plan_id는 " + plan_id);
         String token = request.getHeader("Authorization");
         System.out.println(token);
@@ -54,14 +54,14 @@ public class PlanController {
 
     //계획 수정 화면 불러오기
     @GetMapping("/{plan_id}/edit")
-    public String editPage(@PathVariable long plan_id, @ModelAttribute PlanAddRequest plan) {
+    public String editPage(@PathVariable("plan_id") long plan_id, @ModelAttribute PlanAddRequest plan) {
         //DB에 수정 반영
         return "redirect:/basic/plans/{plan_id}";
     }
 
     //계획 수정
     @PostMapping("/{plan_id}/edit")
-    public ResponseEntity<?> edit(@PathVariable long plan_id, @RequestBody PlaceListDTO dailySchedules,
+    public ResponseEntity<?> edit(@PathVariable("plan_id") long plan_id, @RequestBody PlaceListDTO dailySchedules,
                                   @RequestHeader("Authorization") String token) {
         try {
             System.out.println("스케줄 서버 저장 요청! plan_id는: " + plan_id);
