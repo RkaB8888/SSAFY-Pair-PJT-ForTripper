@@ -25,10 +25,13 @@ const goToFriendProfile = (nickname) => {
 };
 
 // 프로필 이미지 URL 설정 함수
-const getProfileImageUrl = (profileImagePath) => {
-  return profileImagePath
-    ? `${VITE_TRIP_API_URL}${profileImagePath}`
-    : defaultProfileImage;
+const getProfileImageUrl = (url) => {
+  return url ? `${VITE_TRIP_API_URL}${url}` : defaultProfileImage;
+};
+
+// 이미지 로딩 오류 시 기본 이미지로 대체
+const onImageError = (event) => {
+  event.target.src = defaultProfileImage;
 };
 </script>
 
@@ -57,7 +60,8 @@ const getProfileImageUrl = (profileImagePath) => {
                 <img
                   :src="getProfileImageUrl(friend.profileImage)"
                   alt="Friend Profile"
-                  @error="(e) => (e.target.src = defaultProfileImage)"
+                  @error="onImageError"
+                  class="avatar-image"
                 />
               </v-avatar>
               <div class="mt-2 friend-nickname">
@@ -86,5 +90,9 @@ const getProfileImageUrl = (profileImagePath) => {
 .friend-nickname {
   font-size: 16px;
   color: rgb(98, 0, 234);
+}
+
+.avatar-image {
+  object-fit: cover;
 }
 </style>

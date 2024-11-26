@@ -4,6 +4,8 @@ import { useRouter } from "vue-router";
 import { searchUsersByNickname } from "@/api/authApi";
 import { useAuthStore } from "@/stores/auth";
 
+const { VITE_TRIP_API_URL } = import.meta.env; // 추가
+
 const nickname = ref("");
 const users = ref([]);
 const errorMessage = ref("");
@@ -51,6 +53,14 @@ const goToUserPage = (nickname) => {
 
 const onImageError = (event) => {
   event.target.src = defaultProfileImage;
+};
+
+// 프로필 이미지 URL 생성 함수
+const getUserProfileImageUrl = (user) => {
+  console.log(user);
+  return user.profileImage
+    ? `${VITE_TRIP_API_URL}${user.profileImage}`
+    : defaultProfileImage;
 };
 </script>
 
@@ -116,7 +126,7 @@ const onImageError = (event) => {
           <v-card-content class="d-flex align-center pa-3">
             <v-avatar size="64" class="mr-4">
               <img
-                :src="user.profileImage || defaultProfileImage"
+                :src="getUserProfileImageUrl(user)"
                 alt="Profile Image"
                 @error="onImageError"
                 class="avatar-image"

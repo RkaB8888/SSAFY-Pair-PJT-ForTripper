@@ -3,6 +3,7 @@ package com.travel.demo.users.model.service;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -354,6 +355,19 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 	public List<UserDomain> searchUsersByNickname(String nickname) {
-	    return authMapper.findByNicknameContaining(nickname);
+		List<UserEntity> userEntitys = authMapper.findByNicknameContaining(nickname);
+		if(userEntitys==null) return null;
+		List<UserDomain> userDomains = new ArrayList<>();
+		for(UserEntity userEntity: userEntitys) {
+			UserDomain userDomain = new UserDomain();
+			userDomain.setEmail(userEntity.getEmail());
+			userDomain.setName(userEntity.getName());
+			userDomain.setNickName(userEntity.getNickName());
+			userDomain.setRole(userEntity.getRole());
+			userDomain.setProfileImage(userEntity.getProfileImage());
+			userDomain.setJoinDate(userEntity.getCreateDate());
+			userDomains.add(userDomain);
+		}
+	    return userDomains;
 	}
 }

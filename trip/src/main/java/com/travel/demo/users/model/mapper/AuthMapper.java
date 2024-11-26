@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.travel.demo.users.domain.UserDomain;
 import com.travel.demo.users.dto.UserSignUpRequest;
 import com.travel.demo.users.entity.UserEntity;
 
@@ -19,5 +18,5 @@ public interface AuthMapper {
     void updateProfileImage(@Param("email") String email, @Param("profileImage") String profileImage);
     void updateNickname(@Param("email") String email, @Param("nickname") String nickname);
     void deleteUser(@Param("email") String email);
-    List<UserDomain> findByNicknameContaining(String nickname);
+    List<UserEntity> findByNicknameContaining(String nickname);
 }
