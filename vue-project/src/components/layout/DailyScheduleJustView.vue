@@ -21,7 +21,7 @@
     </v-col>
 
     <!-- 우측 리스트 -->
-    <v-col cols="10" class="pa-0">
+    <v-col cols="9" class="pa-0">
       <v-card flat>
         <v-card-title>
           <span>{{ selectedDate || "날짜를 선택하세요" }}</span>

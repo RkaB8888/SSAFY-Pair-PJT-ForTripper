@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" max-width="500px" max-height="80vh">
     <template v-slot:activator="{ props }">
       <v-btn
-        color="blue"
+        color="purple"
         prepend-icon="mdi-pencil"
         text="새 여행 플랜 생성하기"
         variant="outlined"

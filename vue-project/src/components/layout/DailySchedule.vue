@@ -1,7 +1,7 @@
 <template>
   <v-row no-gutters>
     <!-- 좌측 날짜 버튼 -->
-    <v-col cols="3" class="pa-0">
+    <v-col cols="2" class="pa-0">
       <v-list dense class="h-100">
         <v-list-item
           v-for="(schedule, index) in dateWithSchedules"
@@ -110,7 +110,7 @@ function onUpdate() {
 /* 좌측 날짜 버튼 스타일 수정 */
 .date-button {
   width: 100%;
-  height: 100px; /* 정사각형 크기 */
+  height: 70px; /* 정사각형 크기 */
   text-align: center;
   display: flex;
   justify-content: center;

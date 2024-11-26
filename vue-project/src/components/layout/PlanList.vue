@@ -12,8 +12,8 @@ const storeSavePlan = (plan) => {
 
 <style scoped>
 .custom-card {
-  background-color: #e3f2fd !important;
-  border-color: #90caf9 !important;
+  background-color: #f4e3fd !important;
+  border-color: #aa90f9 !important;
 }
 </style>
 
@@ -56,4 +56,3 @@ const storeSavePlan = (plan) => {
     </v-row>
   </v-container>
 </template>
-

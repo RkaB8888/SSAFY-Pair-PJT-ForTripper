@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" max-width="500px" max-height="80vh">
     <template v-slot:activator="{ props }">
       <v-btn
-        color="blue"
+        color="purple"
         text="나의 플랜으로 저장하기"
         variant="outlined"
         v-bind="props"

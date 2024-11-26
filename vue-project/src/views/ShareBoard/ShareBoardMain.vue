@@ -25,15 +25,29 @@ const fetchPosts = async () => {
 onMounted(fetchPosts);
 </script>
 
-
-
 <template>
-    <h1>공유 게시판</h1>
-    <v-btn @click="navigateTo('/planposts/add')">추가</v-btn>
-    <ShareBoardList
-      :sharePosts="sharePosts"
-    />
-    <!-- <v-card
+  <v-container class="text-center">
+    <v-row justify="center" align="center">
+      <v-col cols="12">
+        <h1 class="text-h3 font-weight-bold mt-6 mb-6">플랜 공유 게시판</h1>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-row justify="center" align="center">
+    <!-- 추가 버튼 중앙 정렬 -->
+    <v-col cols="auto">
+      <v-btn
+        color="purple"
+        variant="outlined"
+        v-bind="props"
+        @click="navigateTo('/planposts/add')"
+      >
+        나의 플랜 공유하기
+      </v-btn>
+    </v-col>
+  </v-row>
+  <ShareBoardList :sharePosts="sharePosts" />
+  <!-- <v-card
     class="mx-auto"
     max-width="400"
   >

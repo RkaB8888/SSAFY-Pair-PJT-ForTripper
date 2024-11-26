@@ -77,10 +77,7 @@
       <v-card-title>{{ selectedPlace.displayName }}</v-card-title>
       <v-card-text>
         <p>주소: {{ selectedPlace.formattedAddress }}</p>
-        <p>
-          위치: {{ selectedPlace.location?.lat() }},
-          {{ selectedPlace.location?.lng() }}
-        </p>
+        <p>전화번호: {{ selectedPlace.internationalPhoneNumber }}</p>
         <v-carousel
           v-if="selectedPlace.photos && selectedPlace.photos.length > 0"
           height="200"
