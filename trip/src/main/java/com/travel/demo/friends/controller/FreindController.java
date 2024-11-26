@@ -36,6 +36,7 @@ public class FreindController {
 	public ResponseEntity<?> checkFriendStatus(
 	    @PathVariable("nickname") String nickname,
 	    @RequestHeader("Authorization") String authorizationHeader) {
+		System.out.println("친구인지 확인");
 	    String userEmail = authService.extractEmailFromToken(authorizationHeader);
 	    if (userEmail == null) {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");

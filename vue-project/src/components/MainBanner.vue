@@ -2,15 +2,9 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const images = [
-  "/img/MainBanner2.jpg",
-  "/img/MainBanner3.jpg",
-  "/img/MainBanner4.jpg",
-  "/img/MainBanner5.jpg",
-  "/img/MainBanner6.jpg",
-  "/img/MainBanner7.jpg",
-  "/img/MainBanner8.jpg",
-  "/img/MainBanner9.jpg",
-  "/img/MainBanner10.jpg",
+  "/img/MainBanner1.png",
+  "/img/MainBanner2.png",
+  "/img/MainBanner3.png",
 ];
 
 const currentImageIndex = ref(0);

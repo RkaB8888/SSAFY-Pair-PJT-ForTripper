@@ -1,23 +1,14 @@
 <script setup>
-import { computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useFriendStore } from "@/stores/friend";
+import { localAxios } from "@/util/http-commons"; // 필요한 경우 임포트
 
 const { VITE_TRIP_API_URL } = import.meta.env;
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-  isOwnProfile: {
-    type: Boolean,
-    required: true,
-  },
-});
-
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const friendStore = useFriendStore();
 
@@ -25,25 +16,60 @@ const onImageError = (event) => {
   event.target.src = authStore.defaultProfileImage;
 };
 
+// 유저 정보를 저장할 변수
+const user = ref(null);
+
+// 자신의 프로필인지 확인
+const isOwnProfile = computed(() => {
+  return user.value && user.value.nickname === authStore.loginUserInfo.nickname;
+});
+
 // 가입일자 포맷팅
 const formattedJoinDate = computed(() => {
-  return new Date(props.user.joinDate).toLocaleDateString();
+  return user.value ? new Date(user.value.joinDate).toLocaleDateString() : "";
 });
 
 // 프로필 이미지 URL 설정
 const profileImageUrl = computed(() => {
-  const imageUrl = props.user.profileImage
-    ? `${VITE_TRIP_API_URL}${props.user.profileImage}`
-    : authStore.defaultProfileImage;
+  const imageUrl =
+    user.value && user.value.profileImage
+      ? `${VITE_TRIP_API_URL}${user.value.profileImage}`
+      : authStore.defaultProfileImage;
   return imageUrl;
 });
 
-// 친구 여부 확인
-onMounted(() => {
-  if (!props.isOwnProfile) {
-    friendStore.checkFriendStatus(props.user.nickname);
+// 유저 정보 및 친구 상태 가져오기 함수
+const fetchUserData = async (nickname) => {
+  try {
+    // 유저 정보 가져오기
+    const response = await localAxios().get(`/users/nickname/${nickname}`);
+    user.value = response.data;
+
+    // 친구 상태 확인
+    if (!isOwnProfile.value) {
+      console.log("친구상태확인", nickname, friendStore.isFriend);
+      await friendStore.checkFriendStatus(nickname);
+      console.log("친구상태확인", nickname, friendStore.isFriend);
+    }
+  } catch (error) {
+    console.error("유저 정보 가져오기 실패:", error);
   }
+};
+
+// 초기 마운트 시 데이터 가져오기
+onMounted(() => {
+  fetchUserData(route.params.nickname);
 });
+
+// 라우트 파라미터 변경 감지하여 데이터 다시 가져오기
+watch(
+  () => route.params.nickname,
+  (newNickname, oldNickname) => {
+    if (newNickname !== oldNickname) {
+      fetchUserData(newNickname);
+    }
+  }
+);
 
 const isFriend = computed(() => friendStore.isFriend);
 
@@ -56,11 +82,11 @@ const editProfile = () => {
 const toggleFriend = async () => {
   if (isFriend.value) {
     // 친구 해제 로직
-    await friendStore.removeFriend(props.user.nickname);
+    await friendStore.removeFriend(user.value.nickname);
     alert("친구가 해제되었습니다.");
   } else {
     // 친구 추가 로직
-    await friendStore.addFriend(props.user.nickname);
+    await friendStore.addFriend(user.value.nickname);
     alert("친구가 추가되었습니다.");
   }
 };
@@ -73,7 +99,7 @@ const reportUser = () => {
 </script>
 
 <template>
-  <v-row class="user-info-section">
+  <v-row class="user-info-section" v-if="user">
     <v-col cols="12" md="4" class="text-center">
       <!-- 프로필 사진 -->
       <v-avatar size="128">
@@ -95,15 +121,17 @@ const reportUser = () => {
         <v-btn color="primary" @click="editProfile">정보 수정</v-btn>
       </div>
       <!-- 타인의 정보인 경우 -->
-      <div v-else-if="user.nickname">
+      <div v-else>
         <v-btn color="primary" @click="toggleFriend">
           {{ isFriend ? "친구 해제" : "친구 추가" }}
         </v-btn>
         <v-btn color="error" @click="reportUser">유저 신고</v-btn>
       </div>
-      <div v-else></div>
     </v-col>
   </v-row>
+  <div v-else>
+    <p>유저 정보를 불러오는 중입니다... 존재하지 않는 유저일수도...</p>
+  </div>
 </template>
 
 <style scoped>

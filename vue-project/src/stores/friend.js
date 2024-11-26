@@ -43,8 +43,10 @@ export const useFriendStore = defineStore("friendStore", () => {
     try {
       const response = await localAxios().get(`/friends/status/${nickname}`);
       isFriend.value = response.data.isFriend;
+      return isFriend.value;
     } catch (error) {
       console.error("친구 상태 확인 실패:", error);
+      return false;
     }
   };
 

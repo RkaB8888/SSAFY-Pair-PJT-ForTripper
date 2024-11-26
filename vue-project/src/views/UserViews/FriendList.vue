@@ -14,7 +14,7 @@ const defaultProfileImage = authStore.defaultProfileImage;
 const { VITE_TRIP_API_URL } = import.meta.env;
 
 // 페이지당 친구 수
-const friendsPerPage = 10;
+const friendsPerPage = 24;
 
 const carouselIndex = ref(0);
 
@@ -78,7 +78,7 @@ const getProfileImageUrl = (profileImagePath) => {
                   v-for="friend in page"
                   :key="friend.email"
                   cols="12"
-                  md="6"
+                  md="1"
                   lg="1"
                   class="text-center"
                 >
@@ -101,7 +101,7 @@ const getProfileImageUrl = (profileImagePath) => {
             </v-carousel-item>
           </v-carousel>
           <div v-else>
-            <p>친구 목록이 없습니다.</p>
+            <p>친구가 없습니다.</p>
           </div>
         </v-col>
 
