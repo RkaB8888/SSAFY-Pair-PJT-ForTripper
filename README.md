@@ -1,0 +1,15 @@
+# 🧭 ForTripper – SSAFY Pair Practice Project
+
+**ForTripper**는 여행자들을 위한 일정 관리 및 추천 기능을 제공하는 웹 기반 서비스입니다.  
+이 프로젝트는 SSAFY 12기 관통 페어 프로젝트로 진행되었으며,  
+**정한균**(팀장)과 **이은선**이 2인 1조로 2주간 공동 개발하였습니다.
+
+## 🛠 사용 기술
+- Frontend: Vue3
+- Backend: Spring Boot
+- DB: MySQL
+
+## 📌 주요 기능
+- 여행 일정 생성 및 관리
+- 지도 기반 여행지 추천
+- 사용자 등록 및 로그인
