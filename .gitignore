@@ -27,7 +27,6 @@ yarn-debug.log*
 
 # ========== Environment / Config ==========
 .env
-.env.*
 
 # ========== IDE / Editor ==========
 .vscode/
